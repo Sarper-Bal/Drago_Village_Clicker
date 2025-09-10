@@ -141,3 +141,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DragonController
   dragonData: {fileID: 11400000, guid: 14857e3b3ffca41c5bcc43f507a5f568, type: 2}
+  clickAnimationDuration: 0.2
+  scaleMultiplier: 1.15
+  shakeStrength: 0.1
