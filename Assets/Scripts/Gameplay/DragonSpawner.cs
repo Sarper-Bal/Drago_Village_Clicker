@@ -1,5 +1,5 @@
 using UnityEngine;
-using DG.Tweening; // EKLENDİ: DOTween kütüphanesini bu scripte dahil ediyoruz.
+using DG.Tweening;
 
 public class DragonSpawner : MonoBehaviour
 {
@@ -7,42 +7,33 @@ public class DragonSpawner : MonoBehaviour
     [Tooltip("Ejderhaların yaratılacağı konum.")]
     [SerializeField] private Transform spawnPoint;
 
-    // Sahnede o an aktif olan ejderha objesini aklımızda tutmak için.
     private GameObject currentDragonInstance;
 
     private void OnEnable()
     {
-        // GameManager'dan seviye atlama olayını dinlemeye başla.
         GameManager.OnLevelUp += SpawnDragonForCurrentLevel;
     }
 
     private void OnDisable()
     {
-        // Dinlemeyi bırakmayı unutma!
         GameManager.OnLevelUp -= SpawnDragonForCurrentLevel;
     }
 
     void Start()
     {
-        // Oyun başladığında ilk ejderhayı yarat.
         SpawnDragonForCurrentLevel();
     }
 
-    /// <summary>
-    /// Mevcut seviyeye uygun ejderhayı yaratır.
-    /// </summary>
     private void SpawnDragonForCurrentLevel()
     {
-        // 1. Önceki ejderhayı yok et (eğer varsa).
         if (currentDragonInstance != null)
         {
-            // DOTween ile küçük bir yok olma efekti ekleyebiliriz.
-            currentDragonInstance.transform.DOScale(Vector3.zero, 0.3f)
-                .SetEase(Ease.InBack) // Artık 'Ease' tanınacak.
-                .OnComplete(() => Destroy(currentDragonInstance));
+            GameObject oldDragon = currentDragonInstance;
+            oldDragon.transform.DOScale(Vector3.zero, 0.3f)
+                .SetEase(Ease.InBack)
+                .OnComplete(() => Destroy(oldDragon));
         }
 
-        // 2. GameManager'dan mevcut seviye verisini al.
         LevelData levelData = GameManager.Instance.GetCurrentLevelData();
         if (levelData == null)
         {
@@ -57,21 +48,28 @@ public class DragonSpawner : MonoBehaviour
             return;
         }
 
-        // 3. Yeni ejderhayı spawn point'te yarat (Instantiate).
-        if (spawnPoint == null) spawnPoint = this.transform; // Spawn point atanmamışsa, spawner'ın kendi konumunu kullan.
+        // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
 
+        // 1. Prefab'in orijinal scale değerini bir değişkende sakla.
+        Vector3 originalScale = dragonData.dragonPrefab.transform.localScale;
+
+        // 2. Yeni ejderhayı yarat.
+        if (spawnPoint == null) spawnPoint = this.transform;
         currentDragonInstance = Instantiate(dragonData.dragonPrefab, spawnPoint.position, Quaternion.identity, spawnPoint);
 
-        // 4. Yaratılan ejderhanın Controller'ına kendi verisini ata.
+        // 3. Yaratılan ejderhanın Controller'ına kendi verisini ata.
         DragonController controller = currentDragonInstance.GetComponent<DragonController>();
         if (controller != null)
         {
             controller.dragonData = dragonData;
         }
 
-        // DOTween ile küçük bir belirme efekti.
+        // 4. Belirme animasyonunu başlatmadan önce boyutunu sıfırla.
         currentDragonInstance.transform.localScale = Vector3.zero;
-        currentDragonInstance.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack); // Artık 'Ease' tanınacak.
+        // 5. Animasyonu Vector3.one'a değil, sakladığımız originalScale değerine doğru yap.
+        currentDragonInstance.transform.DOScale(originalScale, 0.5f).SetEase(Ease.OutBack);
+
+        // --- DEĞİŞİKLİK BURADA BİTİYOR ---
 
         Debug.Log($"'{dragonData.dragonName}' yaratıldı.");
     }

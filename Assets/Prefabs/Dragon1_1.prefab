@@ -140,4 +140,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ba56fd5fe59e4ac7b973a2839522ca1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DragonController
-  dragonData: {fileID: 0}
+  dragonData: {fileID: 11400000, guid: 14857e3b3ffca41c5bcc43f507a5f568, type: 2}

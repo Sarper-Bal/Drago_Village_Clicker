@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: LevelData_Lvl_2
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelDescription: Seviye 2
-  goldToReachNextLevel: 10
+  goldToReachNextLevel: 50
   dragonDataForThisLevel: {fileID: 11400000, guid: 5b61feaa0bfd3464c97542be758e04db, type: 2}

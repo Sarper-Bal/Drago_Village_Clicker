@@ -1,39 +1,37 @@
 using UnityEngine;
-using DG.Tweening; // DOTween kütüphanesini kullanabilmek için.
+using UnityEngine.EventSystems; // Event System'i kullanmak için bu satır ÇOK ÖNEMLİ!
+using DG.Tweening;
 
-// Bu script'in çalışması için bir Collider2D bileşeni zorunludur.
 [RequireComponent(typeof(Collider2D))]
-public class DragonController : MonoBehaviour
+// IPointerClickHandler arayüzünü ekliyoruz. Bu, objenin tıklanabilir olduğunu sisteme bildirir.
+public class DragonController : MonoBehaviour, IPointerClickHandler
 {
-    // Bu ejderhanın özelliklerini tutan veri.
-    // Bu, Spawner tarafından atanacak.
     public DragonData dragonData;
-
-    private Vector3 initialScale; // Animasyon için başlangıç boyutunu saklar.
+    private Vector3 initialScale;
 
     void Start()
     {
-        // Başlangıç boyutunu kaydet.
         initialScale = transform.localScale;
-
-        // dragonData'nın atanıp atanmadığını kontrol edelim. Atanmamışsa hata verir.
         if (dragonData == null)
         {
             Debug.LogError("DragonController'a DragonData atanmamış! Lütfen Spawner'ı kontrol edin.", this.gameObject);
         }
     }
 
-    // Fare ile bu objeye tıklandığı an çalışır.
-    private void OnMouseDown()
+    // OnMouseDown yerine bu fonksiyonu kullanacağız.
+    // Bu fonksiyon, EventSystem tarafından collider'a sahip bu objeye tıklandığında OTOMATİK olarak çağrılır.
+    public void OnPointerClick(PointerEventData eventData)
     {
-        // Eğer veri atanmamışsa hiçbir şey yapma.
         if (dragonData == null) return;
 
-        // Tıklama animasyonunu oynat.
+        // Tıklama animasyonu
         transform.DOPunchScale(initialScale * 0.1f, 0.2f);
 
         // GameManager'a kazanılan altın ve tıklama miktarını bildir.
         GameManager.Instance.AddCoins(dragonData.goldPerPress);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
+
+        // Konsola test mesajı ekleyelim, çalıştığından emin olalım.
+        Debug.Log(gameObject.name + " tıklandı!");
     }
 }
