@@ -13,8 +13,16 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     [SerializeField] private float scaleMultiplier = 1.15f;
     [SerializeField] private float shakeStrength = 0.1f;
 
+    // --- YENİ EKLENEN ALANLAR ---
+    [Header("Coin Fırlatma Efekti")]
+    [Tooltip("Fırlatılacak olan görsel coin prefab'ı.")]
+    [SerializeField] private GameObject coinFxPrefab;
+    [Tooltip("Coin'in fırlatılacağı alanın yarıçapı.")]
+    [SerializeField] private float coinSpawnRadius = 2f;
+    // --- BİTTİ ---
+
     private Sequence clickSequence;
-    private bool isDying = false; // GÜVENLİK: Ejderhanın yok edilme sürecinde olup olmadığını kontrol eder.
+    private bool isDying = false;
 
     void Start()
     {
@@ -27,7 +35,6 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // GÜVENLİK: Eğer ejderha zaten yok ediliyorsa, yeni bir tıklama işlemi başlatma.
         if (isDying || dragonData == null) return;
 
         PlayClickFeedbackAnimation();
@@ -52,25 +59,51 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     {
         GameManager.Instance.AddCoins(dragonData.goldPerPress);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
+
+        // --- YENİ EKLENEN MANTIK ---
+        SpawnCoinEffect();
+        // --- BİTTİ ---
+
         Debug.Log(gameObject.name + " tıklandı!");
     }
 
+    // --- YENİ EKLENEN METOT ---
     /// <summary>
-    /// Bu ejderhayı animasyonlu bir şekilde güvenle yok eder. DragonSpawner tarafından çağrılır.
+    /// Ejderhanın etrafında rastgele bir konuma tek bir coin fırlatma efektini başlatır.
     /// </summary>
+    private void SpawnCoinEffect()
+    {
+        if (coinFxPrefab == null)
+        {
+            // Eğer prefab atanmamışsa uyarı ver ve işlemi durdur.
+            Debug.LogWarning("DragonController'a CoinFX Prefab'ı atanmamış.", this.gameObject);
+            return;
+        }
+
+        // 1. Rastgele bir hedef nokta belirle.
+        Vector2 randomCirclePoint = Random.insideUnitCircle * coinSpawnRadius;
+        Vector3 targetPosition = transform.position + new Vector3(randomCirclePoint.x, randomCirclePoint.y, 0);
+
+        // 2. Coin prefab'ını ejderhanın konumunda yarat.
+        GameObject coinInstance = Instantiate(coinFxPrefab, transform.position, Quaternion.identity);
+
+        // 3. Coin'in script'ini al ve animasyonu başlat.
+        CoinFX coinFxScript = coinInstance.GetComponent<CoinFX>();
+        if (coinFxScript != null)
+        {
+            coinFxScript.Launch(targetPosition);
+        }
+    }
+    // --- BİTTİ ---
+
     public void DestroyDragon()
     {
-        // 1. Yok edilme sürecini başlat ve tekrar tıklanmasını engelle.
         isDying = true;
-
-        // 2. Üzerinde çalışan TÜM animasyonları (tıklama dahil) anında ve güvenle durdur.
         if (clickSequence != null && clickSequence.IsActive())
         {
             clickSequence.Kill();
         }
         transform.DOKill();
-
-        // 3. Kendi yok olma animasyonunu başlat ve bittiğinde objeyi yok et.
         transform.DOScale(Vector3.zero, 0.3f)
             .SetEase(Ease.InBack)
             .OnComplete(() => Destroy(gameObject));

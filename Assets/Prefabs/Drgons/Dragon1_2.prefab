@@ -80,7 +80,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: a8ddf05dbd95f4292aec00c6a5fcbef6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -144,3 +144,5 @@ MonoBehaviour:
   clickAnimationDuration: 0.2
   scaleMultiplier: 1.15
   shakeStrength: 0.1
+  coinFxPrefab: {fileID: 7362585257608200534, guid: 93243c613956a425c906342d9e0a81e3, type: 3}
+  coinSpawnRadius: 2
