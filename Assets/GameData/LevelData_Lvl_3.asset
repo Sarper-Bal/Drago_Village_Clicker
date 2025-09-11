@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a5004b62ce339474f9fe1649465d400c, type: 3}
-  m_Name: LevelData_Lvl_1
+  m_Name: LevelData_Lvl_3
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  levelDescription: Seviye 1
-  goldToReachNextLevel: 10
-  dragonDataForThisLevel: {fileID: 11400000, guid: 14857e3b3ffca41c5bcc43f507a5f568, type: 2}
+  levelDescription: Seviye 3
+  goldToReachNextLevel: 50
+  dragonDataForThisLevel: {fileID: 11400000, guid: 5b61feaa0bfd3464c97542be758e04db, type: 2}
   buildingsToUnlock:
-  - buildingPrefab: {fileID: 8914675156127470962, guid: 2178cf977590c42b6b5e4e6b5a0b1c38, type: 3}
-    spawnPointID: Well_Spot
+  - buildingPrefab: {fileID: 3587958799243905693, guid: fc1b64e4982f8401eb309f3fd22f0e2f, type: 3}
+    spawnPointID: House_Spot

@@ -13,5 +13,10 @@ MonoBehaviour:
   m_Name: LevelData_Lvl_2
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelDescription: Seviye 2
-  goldToReachNextLevel: 50
+  goldToReachNextLevel: 20
   dragonDataForThisLevel: {fileID: 11400000, guid: 5b61feaa0bfd3464c97542be758e04db, type: 2}
+  buildingsToUnlock:
+  - buildingPrefab: {fileID: 669532643274623114, guid: 4c1d986f188e94037a7a484b25316467, type: 3}
+    spawnPointID: House_Spot
+  - buildingPrefab: {fileID: 8914675156127470962, guid: 2178cf977590c42b6b5e4e6b5a0b1c38, type: 3}
+    spawnPointID: Well_Spot
