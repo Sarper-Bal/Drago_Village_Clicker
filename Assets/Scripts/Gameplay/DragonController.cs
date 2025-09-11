@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using DG.Tweening; // DOTween'i ve Sequence özelliğini kullanmak için bu satır önemli.
+using DG.Tweening;
 
 [RequireComponent(typeof(Collider2D))]
 public class DragonController : MonoBehaviour, IPointerClickHandler
@@ -8,11 +8,13 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     public DragonData dragonData;
     private Vector3 initialScale;
 
-    // Animasyon ayarlarını Inspector'dan kolayca değiştirebilmek için değişkenler ekliyoruz.
     [Header("Tıklama Animasyon Ayarları")]
-    [SerializeField] private float clickAnimationDuration = 0.2f; // Animasyonun toplam süresi.
-    [SerializeField] private float scaleMultiplier = 1.15f; // Tıklandığında ne kadar büyüyeceği.
-    [SerializeField] private float shakeStrength = 0.1f; // Sarsılma ne kadar güçlü olacak.
+    [SerializeField] private float clickAnimationDuration = 0.2f;
+    [SerializeField] private float scaleMultiplier = 1.15f;
+    [SerializeField] private float shakeStrength = 0.1f;
+
+    private Sequence clickSequence;
+    private bool isDying = false; // GÜVENLİK: Ejderhanın yok edilme sürecinde olup olmadığını kontrol eder.
 
     void Start()
     {
@@ -25,47 +27,52 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (dragonData == null) return;
+        // GÜVENLİK: Eğer ejderha zaten yok ediliyorsa, yeni bir tıklama işlemi başlatma.
+        if (isDying || dragonData == null) return;
 
-        // 1. Ana tıklama fonksiyonu artık sadece animasyonu ve oyun mantığını tetikliyor.
-        // Bu, kodun okunabilirliğini artırır.
         PlayClickFeedbackAnimation();
         ProcessGameLogic();
     }
 
-    /// <summary>
-    /// Tıklama anında çalışacak olan tüm görsel geri bildirim animasyonlarını yönetir.
-    /// </summary>
     private void PlayClickFeedbackAnimation()
     {
-        // Optimizasyon: Eğer bu obje üzerinde çalışan bir animasyon varsa, onu anında bitir.
-        // Bu, oyuncu çok hızlı tıkladığında animasyonların çakışmasını ve garip görünmesini engeller.
-        transform.DOComplete();
+        if (clickSequence != null && clickSequence.IsActive())
+        {
+            clickSequence.Kill();
+        }
 
-        // DOTween Sequence, birden fazla animasyonu birleştirmemizi ve aynı anda oynatmamızı sağlar.
-        // Bu, daha zengin ve katmanlı animasyonlar için mükemmel bir yöntemdir.
-        DOTween.Sequence()
-            // Append: Sıraya yeni bir animasyon ekler.
-            // DOPunchScale: Objeyi belirtilen miktarda anlık büyütür/küçültür ve eski haline döndürür.
-            // Bu, "vuruş" hissinin temelini oluşturur.
-            .Append(transform.DOPunchScale(initialScale * (scaleMultiplier - 1), clickAnimationDuration, 1, 0.5f))
+        clickSequence = DOTween.Sequence();
 
-            // Join: Sıradaki bir önceki animasyonla AYNI ANDA başlayacak yeni bir animasyon ekler.
-            // DOShakePosition: Objeyi belirtilen süre ve güçte sarsar.
-            // Bu, vuruşun "etkisini" ve gücünü artırır.
-            .Join(transform.DOShakePosition(clickAnimationDuration, new Vector3(shakeStrength, shakeStrength, 0), 10, 90, false, true));
+        clickSequence.Append(transform.DOPunchScale(initialScale * (scaleMultiplier - 1), clickAnimationDuration, 1, 0.5f))
+            .Join(transform.DOShakePosition(clickAnimationDuration, new Vector3(shakeStrength, shakeStrength, 0), 10, 90, false, true))
+            .SetTarget(this);
+    }
+
+    private void ProcessGameLogic()
+    {
+        GameManager.Instance.AddCoins(dragonData.goldPerPress);
+        GameManager.Instance.AddClicks(dragonData.clicksPerPress);
+        Debug.Log(gameObject.name + " tıklandı!");
     }
 
     /// <summary>
-    /// Tıklama sonrası çalışacak olan oyun mantığını (altın ekleme vb.) yönetir.
+    /// Bu ejderhayı animasyonlu bir şekilde güvenle yok eder. DragonSpawner tarafından çağrılır.
     /// </summary>
-    private void ProcessGameLogic()
+    public void DestroyDragon()
     {
-        // GameManager'a kazanılan altın ve tıklama miktarını bildir.
-        GameManager.Instance.AddCoins(dragonData.goldPerPress);
-        GameManager.Instance.AddClicks(dragonData.clicksPerPress);
+        // 1. Yok edilme sürecini başlat ve tekrar tıklanmasını engelle.
+        isDying = true;
 
-        // Konsola test mesajı.
-        Debug.Log(gameObject.name + " tıklandı!");
+        // 2. Üzerinde çalışan TÜM animasyonları (tıklama dahil) anında ve güvenle durdur.
+        if (clickSequence != null && clickSequence.IsActive())
+        {
+            clickSequence.Kill();
+        }
+        transform.DOKill();
+
+        // 3. Kendi yok olma animasyonunu başlat ve bittiğinde objeyi yok et.
+        transform.DOScale(Vector3.zero, 0.3f)
+            .SetEase(Ease.InBack)
+            .OnComplete(() => Destroy(gameObject));
     }
 }

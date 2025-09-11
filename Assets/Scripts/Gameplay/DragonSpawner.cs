@@ -28,17 +28,16 @@ public class DragonSpawner : MonoBehaviour
     {
         if (currentDragonInstance != null)
         {
-            GameObject oldDragon = currentDragonInstance;
-
-            // --- YENİ EKLENEN SATIR ---
-            // Yok etme animasyonuna başlamadan önce, bu obje üzerindeki diğer tüm DOTween animasyonlarını anında durdur.
-            // Bu, tıklama ve yok etme animasyonlarının çakışmasını engeller.
-            oldDragon.transform.DOKill();
-
-            // Şimdi yok etme animasyonunu güvenle başlatabiliriz.
-            oldDragon.transform.DOScale(Vector3.zero, 0.3f)
-                .SetEase(Ease.InBack)
-                .OnComplete(() => Destroy(oldDragon));
+            DragonController oldDragonController = currentDragonInstance.GetComponent<DragonController>();
+            if (oldDragonController != null)
+            {
+                // Hatanın olduğu yer burasıydı. Artık DragonController'da bu metot var.
+                oldDragonController.DestroyDragon();
+            }
+            else
+            {
+                Destroy(currentDragonInstance);
+            }
         }
 
         LevelData levelData = GameManager.Instance.GetCurrentLevelData();
