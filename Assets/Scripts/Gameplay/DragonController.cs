@@ -13,13 +13,15 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     [SerializeField] private float scaleMultiplier = 1.15f;
     [SerializeField] private float shakeStrength = 0.1f;
 
-    // --- YENİ EKLENEN ALANLAR ---
     [Header("Coin Fırlatma Efekti")]
     [Tooltip("Fırlatılacak olan görsel coin prefab'ı.")]
     [SerializeField] private GameObject coinFxPrefab;
     [Tooltip("Coin'in fırlatılacağı alanın yarıçapı.")]
     [SerializeField] private float coinSpawnRadius = 2f;
-    // --- BİTTİ ---
+
+    [Header("Uçuşan Text Efekti")]
+    [Tooltip("Kazancı göstermek için fırlatılacak olan text prefab'ı.")]
+    [SerializeField] private GameObject floatingTextFxPrefab;
 
     private Sequence clickSequence;
     private bool isDying = false;
@@ -47,9 +49,7 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
         {
             clickSequence.Kill();
         }
-
         clickSequence = DOTween.Sequence();
-
         clickSequence.Append(transform.DOPunchScale(initialScale * (scaleMultiplier - 1), clickAnimationDuration, 1, 0.5f))
             .Join(transform.DOShakePosition(clickAnimationDuration, new Vector3(shakeStrength, shakeStrength, 0), 10, 90, false, true))
             .SetTarget(this);
@@ -57,44 +57,47 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
 
     private void ProcessGameLogic()
     {
-        GameManager.Instance.AddCoins(dragonData.goldPerPress);
+        int goldGained = dragonData.goldPerPress;
+
+        GameManager.Instance.AddCoins(goldGained);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
 
-        // --- YENİ EKLENEN MANTIK ---
         SpawnCoinEffect();
-        // --- BİTTİ ---
+        ShowFloatingTextEffect(goldGained);
 
         Debug.Log(gameObject.name + " tıklandı!");
     }
 
-    // --- YENİ EKLENEN METOT ---
-    /// <summary>
-    /// Ejderhanın etrafında rastgele bir konuma tek bir coin fırlatma efektini başlatır.
-    /// </summary>
     private void SpawnCoinEffect()
     {
-        if (coinFxPrefab == null)
-        {
-            // Eğer prefab atanmamışsa uyarı ver ve işlemi durdur.
-            Debug.LogWarning("DragonController'a CoinFX Prefab'ı atanmamış.", this.gameObject);
-            return;
-        }
-
-        // 1. Rastgele bir hedef nokta belirle.
+        if (coinFxPrefab == null) return;
         Vector2 randomCirclePoint = Random.insideUnitCircle * coinSpawnRadius;
         Vector3 targetPosition = transform.position + new Vector3(randomCirclePoint.x, randomCirclePoint.y, 0);
-
-        // 2. Coin prefab'ını ejderhanın konumunda yarat.
         GameObject coinInstance = Instantiate(coinFxPrefab, transform.position, Quaternion.identity);
-
-        // 3. Coin'in script'ini al ve animasyonu başlat.
         CoinFX coinFxScript = coinInstance.GetComponent<CoinFX>();
         if (coinFxScript != null)
         {
             coinFxScript.Launch(targetPosition);
         }
     }
-    // --- BİTTİ ---
+
+    private void ShowFloatingTextEffect(int goldAmount)
+    {
+        if (floatingTextFxPrefab == null)
+        {
+            Debug.LogWarning("DragonController'a FloatingTextFX Prefab'ı atanmamış.", this.gameObject);
+            return;
+        }
+
+        Vector3 spawnPosition = transform.position + Vector3.up * 0.5f;
+        GameObject textInstance = Instantiate(floatingTextFxPrefab, spawnPosition, Quaternion.identity);
+
+        FloatingTextFX textFxScript = textInstance.GetComponent<FloatingTextFX>();
+        if (textFxScript != null)
+        {
+            textFxScript.Show("+" + goldAmount.ToString(), spawnPosition);
+        }
+    }
 
     public void DestroyDragon()
     {
