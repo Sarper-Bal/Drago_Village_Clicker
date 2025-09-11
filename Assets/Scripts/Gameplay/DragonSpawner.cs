@@ -29,6 +29,13 @@ public class DragonSpawner : MonoBehaviour
         if (currentDragonInstance != null)
         {
             GameObject oldDragon = currentDragonInstance;
+
+            // --- YENİ EKLENEN SATIR ---
+            // Yok etme animasyonuna başlamadan önce, bu obje üzerindeki diğer tüm DOTween animasyonlarını anında durdur.
+            // Bu, tıklama ve yok etme animasyonlarının çakışmasını engeller.
+            oldDragon.transform.DOKill();
+
+            // Şimdi yok etme animasyonunu güvenle başlatabiliriz.
             oldDragon.transform.DOScale(Vector3.zero, 0.3f)
                 .SetEase(Ease.InBack)
                 .OnComplete(() => Destroy(oldDragon));
@@ -48,29 +55,16 @@ public class DragonSpawner : MonoBehaviour
             return;
         }
 
-        // --- DEĞİŞİKLİK BURADA BAŞLIYOR ---
-
-        // 1. Prefab'in orijinal scale değerini bir değişkende sakla.
         Vector3 originalScale = dragonData.dragonPrefab.transform.localScale;
-
-        // 2. Yeni ejderhayı yarat.
-        if (spawnPoint == null) spawnPoint = this.transform;
         currentDragonInstance = Instantiate(dragonData.dragonPrefab, spawnPoint.position, Quaternion.identity, spawnPoint);
-
-        // 3. Yaratılan ejderhanın Controller'ına kendi verisini ata.
         DragonController controller = currentDragonInstance.GetComponent<DragonController>();
         if (controller != null)
         {
             controller.dragonData = dragonData;
         }
 
-        // 4. Belirme animasyonunu başlatmadan önce boyutunu sıfırla.
         currentDragonInstance.transform.localScale = Vector3.zero;
-        // 5. Animasyonu Vector3.one'a değil, sakladığımız originalScale değerine doğru yap.
         currentDragonInstance.transform.DOScale(originalScale, 0.5f).SetEase(Ease.OutBack);
-
-        // --- DEĞİŞİKLİK BURADA BİTİYOR ---
-
         Debug.Log($"'{dragonData.dragonName}' yaratıldı.");
     }
 }
