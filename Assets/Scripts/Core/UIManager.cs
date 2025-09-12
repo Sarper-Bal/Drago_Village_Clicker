@@ -61,7 +61,7 @@ public class UIManager : Singleton<UIManager>
     }
 
     /// <summary>
-    /// Ejderhaya tıklandığında panelde eğlenceli ve esnek bir animasyon oynatır.
+    /// Ejderhaya tıklandığında panelde daha abartılı ve esnek bir animasyon oynatır.
     /// </summary>
     private void PlayClickAnimation()
     {
@@ -75,10 +75,14 @@ public class UIManager : Singleton<UIManager>
         // Yeni bir animasyon zinciri (Sequence) oluşturuyoruz.
         panelClickSequence = DOTween.Sequence();
 
-        // Animasyon zincirini oluşturuyoruz: Ezil -> Uza -> Yerine Otur
-        panelClickSequence.Append(levelUpPanel.DOScale(new Vector3(1.1f, 0.9f, 1f), 0.08f)) // 1. Adım: Ezilme
-            .Append(levelUpPanel.DOScale(new Vector3(0.9f, 1.1f, 1f), 0.08f)) // 2. Adım: Uzanma
-            .Append(levelUpPanel.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutElastic)); // 3. Adım: Elastik bir şekilde normale dönme
+        // Animasyon zincirini oluşturuyoruz: Daha Dramatik Ezil -> Daha Dramatik Uza -> Abartılı Elastik Yerine Otur
+        // Değerler daha abartılı bir etki için artırıldı.
+        panelClickSequence.Append(levelUpPanel.DOScale(new Vector3(1.2f, 0.8f, 1f), 0.1f)) // 1. Adım: Ezilme (daha belirgin)
+            .Append(levelUpPanel.DOScale(new Vector3(0.8f, 1.2f, 1f), 0.1f)) // 2. Adım: Uzanma (daha belirgin)
+            .Append(levelUpPanel.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutElastic).SetLoops(1, LoopType.Yoyo)); // 3. Adım: Abartılı Elastik bir şekilde normale dönme. Loops(1, Yoyo) ile hafif bir zıplama ekledik.
+
+        // Animasyonun bu objeyi hedeflemesini sağlayarak güvenlik ve temizlik katıyoruz.
+        panelClickSequence.SetTarget(this);
     }
 
     private void OnLevelUpButtonClicked()
