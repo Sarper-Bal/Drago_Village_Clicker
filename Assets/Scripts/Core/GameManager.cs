@@ -4,9 +4,8 @@ using System;
 public class GameManager : Singleton<GameManager>
 {
     public static event Action OnLevelUp;
-    // --- YENİ EKLENEN OLAYLAR ---
-    public static event Action OnStatsChanged; // Altın gibi değerler değiştiğinde tetiklenir.
-    public static event Action<bool> OnLevelUpReady; // Seviye atlamaya hazır olup olunmadığını bildirir.
+    public static event Action OnStatsChanged;
+    public static event Action<bool> OnLevelUpReady;
 
     [Header("Oyun İlerleme Ayarları")]
     [Tooltip("Tüm oyun seviyeleri buraya sırasıyla atanmalıdır.")]
@@ -17,7 +16,6 @@ public class GameManager : Singleton<GameManager>
     public int TotalClicks { get; private set; }
     public int CurrentLevelIndex { get; private set; }
 
-    // --- YENİ EKLENEN DURUM ---
     private bool isReadyToLevelUp = false;
 
     public LevelData GetCurrentLevelData()
@@ -32,6 +30,8 @@ public class GameManager : Singleton<GameManager>
     void Start()
     {
         LoadGame();
+        // Oyun başladığında UI'ın doğru veriyi göstermesi için ilk güncellemeyi tetikle.
+        OnStatsChanged?.Invoke();
     }
 
     public void AddCoins(int amount)
@@ -39,20 +39,18 @@ public class GameManager : Singleton<GameManager>
         TotalCoins += amount;
         Debug.Log($"Altın eklendi: +{amount}. Toplam Altın: {TotalCoins}");
 
-        OnStatsChanged?.Invoke(); // UI'a "değerler değişti, metnini güncelle" diye haber ver.
+        OnStatsChanged?.Invoke();
         CheckForLevelUpCondition();
     }
 
     public void AddClicks(int amount)
     {
         TotalClicks += amount;
-        OnStatsChanged?.Invoke(); // UI'a haber ver.
+        OnStatsChanged?.Invoke();
     }
 
-    // --- GÜNCELLENMİŞ METOT ---
     private void CheckForLevelUpCondition()
     {
-        // Eğer zaten atlamaya hazırsa, tekrar kontrol etmeye gerek yok.
         if (isReadyToLevelUp) return;
 
         LevelData currentLevel = GetCurrentLevelData();
@@ -60,21 +58,30 @@ public class GameManager : Singleton<GameManager>
         {
             if (TotalCoins >= currentLevel.goldToReachNextLevel)
             {
-                // Koşul sağlandı! Otomatik atlamak yerine durumu değiştir ve UI'a haber ver.
                 isReadyToLevelUp = true;
-                OnLevelUpReady?.Invoke(true); // UI'a "butonu aktifleştir" sinyalini yolla.
+                OnLevelUpReady?.Invoke(true);
             }
         }
     }
 
-    // --- YENİ EKLENEN METOT ---
     /// <summary>
     /// UIManager tarafından çağrılır. Oyuncu butona tıkladığında seviye atlama işlemini gerçekleştirir.
     /// </summary>
     public void PerformLevelUp()
     {
-        // Sadece hazır olduğunda seviye atla.
         if (!isReadyToLevelUp) return;
+
+        LevelData currentLevel = GetCurrentLevelData();
+        if (currentLevel == null) return;
+
+        // --- YENİ EKLENEN MANTIK ---
+        // Seviye atlamanın bedelini hesapla ve altını harca.
+        int costToLevelUp = currentLevel.goldToReachNextLevel;
+        if (TotalCoins >= costToLevelUp)
+        {
+            TotalCoins -= costToLevelUp; // Altını azalt.
+        }
+        // --- BİTTİ ---
 
         isReadyToLevelUp = false;
         LevelUp();
@@ -83,9 +90,9 @@ public class GameManager : Singleton<GameManager>
     private void LevelUp()
     {
         CurrentLevelIndex++;
-        OnLevelUp?.Invoke(); // DragonSpawner ve VillageManager'a haber ver.
-        OnLevelUpReady?.Invoke(false); // UI'a "butonu normale döndür" sinyalini yolla.
-        OnStatsChanged?.Invoke(); // UI'a yeni seviyenin hedeflerini göstermesi için haber ver.
+        OnLevelUp?.Invoke();
+        OnLevelUpReady?.Invoke(false);
+        OnStatsChanged?.Invoke(); // UI'ın yeni altın miktarını ve hedefini göstermesi için güncelle.
         Debug.LogWarning($"SEVİYE ATLANDI! Yeni Seviye: {CurrentLevelIndex + 1}");
     }
 

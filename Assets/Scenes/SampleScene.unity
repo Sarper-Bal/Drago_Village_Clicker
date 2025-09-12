@@ -1958,6 +1958,7 @@ MonoBehaviour:
   levelUpPanel: {fileID: 170109410}
   progressText: {fileID: 964703869}
   levelUpButton: {fileID: 170109413}
+  goldPrefix: 
 --- !u!4 &1169356631
 Transform:
   m_ObjectHideFlags: 0

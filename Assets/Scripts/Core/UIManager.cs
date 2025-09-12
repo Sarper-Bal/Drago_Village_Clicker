@@ -10,8 +10,15 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private Button levelUpButton;
 
-    // Animasyon sekansını saklamak için bir değişken. Bu, optimizasyon için önemlidir.
+    // --- DEĞİŞİKLİK BURADA ---
+    [Header("UI Ayarları")]
+    [Tooltip("Altın metninin başına eklenecek metin. İkonu kaldırmak için boş bırakın.")]
+    // Varsayılan değeri boş bir string "" yaparak ikonu kaldırdık.
+    [SerializeField] private string goldPrefix = "";
+
     private Sequence panelClickSequence;
+    private Sequence panelReadyPulseSequence;
+    private bool isReadyForLevelUp = false;
 
     private void OnEnable()
     {
@@ -34,59 +41,69 @@ public class UIManager : Singleton<UIManager>
         UpdateProgressUI();
     }
 
+    /// <summary>
+    /// Paneldeki metni, HER ZAMAN oyuncunun sahip olduğu toplam altın miktarını gösterecek şekilde günceller.
+    /// </summary>
     private void UpdateProgressUI()
     {
-        LevelData currentLevel = GameManager.Instance.GetCurrentLevelData();
-        if (currentLevel == null) return;
-
         long currentGold = GameManager.Instance.TotalCoins;
-        long targetGold = currentLevel.goldToReachNextLevel;
 
-        progressText.text = $"{currentGold} / {targetGold}";
+        // Metni, başında prefix olmadan sadece sayıyı gösterecek şekilde formatla.
+        progressText.text = $"{goldPrefix}{currentGold:N0}";
     }
 
     private void SetLevelUpReadyState(bool isReady)
     {
+        isReadyForLevelUp = isReady;
+
         if (isReady)
         {
             levelUpButton.interactable = true;
-            progressText.text = "SEVİYE ATLA!";
-            // TODO: Butona dikkat çekici bir animasyon ekle (parlama, büyüme vb.)
+            StartReadyPulseAnimation();
         }
         else
         {
             levelUpButton.interactable = false;
+            StopReadyPulseAnimation();
             UpdateProgressUI();
         }
     }
 
-    /// <summary>
-    /// Ejderhaya tıklandığında panelde daha abartılı ve esnek bir animasyon oynatır.
-    /// </summary>
     private void PlayClickAnimation()
     {
-        // Optimizasyon: Eğer önceki animasyon hala çalışıyorsa, onu anında bitir.
-        // true parametresi, animasyonun son haline atlamasını sağlar, bu da çakışmaları önler.
+        if (isReadyForLevelUp) return;
+
         if (panelClickSequence != null && panelClickSequence.IsActive())
         {
             panelClickSequence.Complete(true);
         }
 
-        // Yeni bir animasyon zinciri (Sequence) oluşturuyoruz.
         panelClickSequence = DOTween.Sequence();
-
-        // Animasyon zincirini oluşturuyoruz: Daha Dramatik Ezil -> Daha Dramatik Uza -> Abartılı Elastik Yerine Otur
-        // Değerler daha abartılı bir etki için artırıldı.
-        panelClickSequence.Append(levelUpPanel.DOScale(new Vector3(1.2f, 0.8f, 1f), 0.1f)) // 1. Adım: Ezilme (daha belirgin)
-            .Append(levelUpPanel.DOScale(new Vector3(0.8f, 1.2f, 1f), 0.1f)) // 2. Adım: Uzanma (daha belirgin)
-            .Append(levelUpPanel.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutElastic).SetLoops(1, LoopType.Yoyo)); // 3. Adım: Abartılı Elastik bir şekilde normale dönme. Loops(1, Yoyo) ile hafif bir zıplama ekledik.
-
-        // Animasyonun bu objeyi hedeflemesini sağlayarak güvenlik ve temizlik katıyoruz.
-        panelClickSequence.SetTarget(this);
+        panelClickSequence.Append(levelUpPanel.DOScale(new Vector3(1.1f, 0.9f, 1f), 0.08f))
+            .Append(levelUpPanel.DOScale(new Vector3(0.9f, 1.1f, 1f), 0.08f))
+            .Append(levelUpPanel.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutElastic));
     }
 
     private void OnLevelUpButtonClicked()
     {
         GameManager.Instance.PerformLevelUp();
+    }
+
+    private void StartReadyPulseAnimation()
+    {
+        StopReadyPulseAnimation();
+        panelReadyPulseSequence = DOTween.Sequence();
+        panelReadyPulseSequence.Append(levelUpPanel.DOScale(1.05f, 0.5f).SetEase(Ease.InOutSine))
+            .Append(levelUpPanel.DOScale(1f, 0.5f).SetEase(Ease.InOutSine))
+            .SetLoops(-1);
+    }
+
+    private void StopReadyPulseAnimation()
+    {
+        if (panelReadyPulseSequence != null && panelReadyPulseSequence.IsActive())
+        {
+            panelReadyPulseSequence.Kill();
+        }
+        levelUpPanel.localScale = Vector3.one;
     }
 }
