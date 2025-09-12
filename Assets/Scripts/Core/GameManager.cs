@@ -4,20 +4,22 @@ using System;
 public class GameManager : Singleton<GameManager>
 {
     public static event Action OnLevelUp;
-    // UI olmadığı için şimdilik OnStatsChanged olayına ihtiyacımız yok, ama ileride lazım olacak.
-    // public static event Action OnStatsChanged;
+    // --- YENİ EKLENEN OLAYLAR ---
+    public static event Action OnStatsChanged; // Altın gibi değerler değiştiğinde tetiklenir.
+    public static event Action<bool> OnLevelUpReady; // Seviye atlamaya hazır olup olunmadığını bildirir.
 
     [Header("Oyun İlerleme Ayarları")]
     [Tooltip("Tüm oyun seviyeleri buraya sırasıyla atanmalıdır.")]
     [SerializeField]
     private LevelData[] levelProgression;
 
-    // Oyuncu verileri
     public int TotalCoins { get; private set; }
     public int TotalClicks { get; private set; }
     public int CurrentLevelIndex { get; private set; }
 
-    // Mevcut seviyenin LevelData'sına hızlı erişim sağlar.
+    // --- YENİ EKLENEN DURUM ---
+    private bool isReadyToLevelUp = false;
+
     public LevelData GetCurrentLevelData()
     {
         if (CurrentLevelIndex >= 0 && CurrentLevelIndex < levelProgression.Length)
@@ -29,48 +31,66 @@ public class GameManager : Singleton<GameManager>
 
     void Start()
     {
-        // TODO: Verileri yükle (SaveManager). Şimdilik sıfırdan başlıyoruz.
         LoadGame();
     }
 
     public void AddCoins(int amount)
     {
         TotalCoins += amount;
-        // UI olmadığından, ilerlemeyi konsoldan takip edelim.
         Debug.Log($"Altın eklendi: +{amount}. Toplam Altın: {TotalCoins}");
-        CheckForLevelUp();
+
+        OnStatsChanged?.Invoke(); // UI'a "değerler değişti, metnini güncelle" diye haber ver.
+        CheckForLevelUpCondition();
     }
 
     public void AddClicks(int amount)
     {
         TotalClicks += amount;
-        Debug.Log($"Tıklama eklendi: +{amount}. Toplam Tıklama: {TotalClicks}");
+        OnStatsChanged?.Invoke(); // UI'a haber ver.
     }
 
-    private void CheckForLevelUp()
+    // --- GÜNCELLENMİŞ METOT ---
+    private void CheckForLevelUpCondition()
     {
+        // Eğer zaten atlamaya hazırsa, tekrar kontrol etmeye gerek yok.
+        if (isReadyToLevelUp) return;
+
         LevelData currentLevel = GetCurrentLevelData();
-        // Eğer son seviyede değilsek ve seviye verisi geçerliyse...
         if (currentLevel != null && CurrentLevelIndex < levelProgression.Length - 1)
         {
             if (TotalCoins >= currentLevel.goldToReachNextLevel)
             {
-                LevelUp();
+                // Koşul sağlandı! Otomatik atlamak yerine durumu değiştir ve UI'a haber ver.
+                isReadyToLevelUp = true;
+                OnLevelUpReady?.Invoke(true); // UI'a "butonu aktifleştir" sinyalini yolla.
             }
         }
+    }
+
+    // --- YENİ EKLENEN METOT ---
+    /// <summary>
+    /// UIManager tarafından çağrılır. Oyuncu butona tıkladığında seviye atlama işlemini gerçekleştirir.
+    /// </summary>
+    public void PerformLevelUp()
+    {
+        // Sadece hazır olduğunda seviye atla.
+        if (!isReadyToLevelUp) return;
+
+        isReadyToLevelUp = false;
+        LevelUp();
     }
 
     private void LevelUp()
     {
         CurrentLevelIndex++;
-        OnLevelUp?.Invoke();
+        OnLevelUp?.Invoke(); // DragonSpawner ve VillageManager'a haber ver.
+        OnLevelUpReady?.Invoke(false); // UI'a "butonu normale döndür" sinyalini yolla.
+        OnStatsChanged?.Invoke(); // UI'a yeni seviyenin hedeflerini göstermesi için haber ver.
         Debug.LogWarning($"SEVİYE ATLANDI! Yeni Seviye: {CurrentLevelIndex + 1}");
     }
 
-    // Şimdilik basit başlangıç değerleri atayan metodlar.
     private void LoadGame()
     {
-        // TODO: PlayerPrefs'ten veri çekilecek.
         TotalCoins = 0;
         TotalClicks = 0;
         CurrentLevelIndex = 0;

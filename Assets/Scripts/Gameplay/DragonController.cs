@@ -1,10 +1,13 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
+using System;
 
 [RequireComponent(typeof(Collider2D))]
 public class DragonController : MonoBehaviour, IPointerClickHandler
 {
+    public static event Action OnDragonClicked;
+
     public DragonData dragonData;
     private Vector3 initialScale;
 
@@ -14,13 +17,12 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     [SerializeField] private float shakeStrength = 0.1f;
 
     [Header("Coin Fırlatma Efekti")]
-    [Tooltip("Fırlatılacak olan görsel coin prefab'ı.")]
     [SerializeField] private GameObject coinFxPrefab;
+    // --- HATA VEREN SATIRIN DEĞİŞKENİ BURADA DOĞRU BİR ŞEKİLDE TANIMLANIYOR ---
     [Tooltip("Coin'in fırlatılacağı alanın yarıçapı.")]
     [SerializeField] private float coinSpawnRadius = 2f;
 
     [Header("Uçuşan Text Efekti")]
-    [Tooltip("Kazancı göstermek için fırlatılacak olan text prefab'ı.")]
     [SerializeField] private GameObject floatingTextFxPrefab;
 
     private Sequence clickSequence;
@@ -39,6 +41,7 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     {
         if (isDying || dragonData == null) return;
 
+        OnDragonClicked?.Invoke();
         PlayClickFeedbackAnimation();
         ProcessGameLogic();
     }
@@ -58,21 +61,22 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     private void ProcessGameLogic()
     {
         int goldGained = dragonData.goldPerPress;
-
         GameManager.Instance.AddCoins(goldGained);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
-
         SpawnCoinEffect();
         ShowFloatingTextEffect(goldGained);
-
         Debug.Log(gameObject.name + " tıklandı!");
     }
 
     private void SpawnCoinEffect()
     {
         if (coinFxPrefab == null) return;
-        Vector2 randomCirclePoint = Random.insideUnitCircle * coinSpawnRadius;
+
+        // Hata veren satırın kendisi burada ve tamamen doğru.
+        // Yukarıda coinSpawnRadius tanımlandığı için artık hata vermeyecektir.
+        Vector2 randomCirclePoint = UnityEngine.Random.insideUnitCircle * coinSpawnRadius;
         Vector3 targetPosition = transform.position + new Vector3(randomCirclePoint.x, randomCirclePoint.y, 0);
+
         GameObject coinInstance = Instantiate(coinFxPrefab, transform.position, Quaternion.identity);
         CoinFX coinFxScript = coinInstance.GetComponent<CoinFX>();
         if (coinFxScript != null)
@@ -83,15 +87,9 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
 
     private void ShowFloatingTextEffect(int goldAmount)
     {
-        if (floatingTextFxPrefab == null)
-        {
-            Debug.LogWarning("DragonController'a FloatingTextFX Prefab'ı atanmamış.", this.gameObject);
-            return;
-        }
-
+        if (floatingTextFxPrefab == null) return;
         Vector3 spawnPosition = transform.position + Vector3.up * 0.5f;
         GameObject textInstance = Instantiate(floatingTextFxPrefab, spawnPosition, Quaternion.identity);
-
         FloatingTextFX textFxScript = textInstance.GetComponent<FloatingTextFX>();
         if (textFxScript != null)
         {
