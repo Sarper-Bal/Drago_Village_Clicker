@@ -1,56 +1,78 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 [RequireComponent(typeof(Collider2D))]
 public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
 {
     [Header("Geliştirme Zinciri")]
-    [Tooltip("Bu binanın ilk geliştirme seviyesini temsil eden veri dosyası.")]
     [SerializeField] private UpgradeData initialUpgradeData;
+
+    [Header("Görsel Efektler")]
+    [SerializeField] private GameObject floatingTextFxPrefab;
+    [SerializeField] private float textSpawnOffsetY = 1.0f;
 
     public UpgradeData CurrentUpgradeData { get; private set; }
     public int CurrentLevel { get; private set; } = 0;
+
+    // --- EKSİK OLAN VE GERİ EKLENEN DEĞİŞKENLER ---
+    // Bu binanın mevcut saniye başına altın üretimini tutar.
+    private int currentGoldPerSecond = 0;
+    // Saniye sayacı için bir zamanlayıcı.
+    private float timer = 0f;
+
+    // Animasyonlar için değişkenler
+    private Sequence activeAnimationSequence;
+    private Vector3 initialScale;
 
     private void Awake()
     {
         CurrentUpgradeData = initialUpgradeData;
         CurrentLevel = 1;
+        initialScale = transform.localScale;
     }
 
     /// <summary>
-    /// Bu binanın üzerine tıklandığında, oyuncu seviyesini kontrol ederek paneli açar.
+    /// Her saniye pasif altın üretir ve görsel geri bildirimini tetikler.
     /// </summary>
+    private void Update()
+    {
+        if (currentGoldPerSecond == 0) return;
+
+        timer += Time.deltaTime;
+
+        if (timer >= 1f)
+        {
+            GameManager.Instance.AddCoins(currentGoldPerSecond);
+            ShowIncomeFeedback(currentGoldPerSecond);
+            timer -= 1f;
+        }
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Eğer geliştirme zinciri bittiyse (max seviyeye ulaştıysa) bir şey yapma.
         if (CurrentUpgradeData == null)
         {
             Debug.Log($"{gameObject.name} maksimum seviyeye ulaşmış.");
-            // TODO: Oyuncuya maksimum seviyede olduğuna dair bir görsel geri bildirim gösterilebilir.
             return;
         }
 
-        // --- YENİ EKLENEN SEVİYE KONTROLÜ ---
-        // GameManager'dan oyuncunun mevcut ejderha seviyesini al.
-        // CurrentLevelIndex 0'dan başladığı için karşılaştırma yaparken 1 ekliyoruz.
         int playerLevel = GameManager.Instance.CurrentLevelIndex + 1;
-
-        // Oyuncunun seviyesi, bu geliştirmeyi görmek için gereken minimum seviyeden büyük veya eşit mi?
         if (playerLevel >= CurrentUpgradeData.minPlayerLevel)
         {
-            // Eğer seviye yeterliyse, geliştirme panelini göster.
             UpgradePopupManager.Instance.ShowUpgradePopup(this);
         }
         else
         {
-            // Eğer seviye yeterli değilse, paneli açma ve konsola bilgi ver.
             Debug.Log($"'{CurrentUpgradeData.upgradeName}' için yeterli seviyede değilsin. Gerekli Seviye: {CurrentUpgradeData.minPlayerLevel}, Mevcut Seviye: {playerLevel}");
-            // TODO: Oyuncuya "Daha yüksek seviye gerekli" diye bir geri bildirim gösterilebilir.
         }
     }
 
     public void AdvanceToNextUpgrade()
     {
+        currentGoldPerSecond += CurrentUpgradeData.goldPerSecondBonus;
+        StartActiveAnimation();
+
         if (CurrentUpgradeData.nextUpgrade != null)
         {
             CurrentUpgradeData = CurrentUpgradeData.nextUpgrade;
@@ -60,6 +82,44 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         {
             CurrentUpgradeData = null;
             CurrentLevel++;
+        }
+    }
+
+    private void StartActiveAnimation()
+    {
+        if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
+        {
+            activeAnimationSequence.Kill();
+        }
+        transform.localScale = initialScale;
+
+        activeAnimationSequence = DOTween.Sequence();
+        activeAnimationSequence.Append(transform.DOScale(new Vector3(initialScale.x * 1.1f, initialScale.y * 0.9f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
+            .Append(transform.DOScale(new Vector3(initialScale.x * 0.9f, initialScale.y * 1.1f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
+            .Append(transform.DOScale(initialScale, 0.5f).SetEase(Ease.InOutSine))
+            .AppendInterval(1f)
+            .SetLoops(-1);
+    }
+
+    private void ShowIncomeFeedback(int goldAmount)
+    {
+        if (floatingTextFxPrefab == null) return;
+
+        Vector3 spawnPosition = transform.position + Vector3.up * textSpawnOffsetY;
+        GameObject textInstance = Instantiate(floatingTextFxPrefab, spawnPosition, Quaternion.identity);
+
+        FloatingTextFX textFxScript = textInstance.GetComponent<FloatingTextFX>();
+        if (textFxScript != null)
+        {
+            textFxScript.Show("+" + goldAmount.ToString(), spawnPosition);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
+        {
+            activeAnimationSequence.Kill();
         }
     }
 }

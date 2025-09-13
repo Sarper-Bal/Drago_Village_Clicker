@@ -151,3 +151,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeableBuilding
   initialUpgradeData: {fileID: 11400000, guid: 8445d4a4a1178437e9f64bd2bff2a16f, type: 2}
+  floatingTextFxPrefab: {fileID: 116957585993845926, guid: 6e034324e86614bbe85930bcc731c92e, type: 3}
+  textSpawnOffsetY: 0.5
