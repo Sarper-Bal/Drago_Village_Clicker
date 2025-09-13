@@ -15,13 +15,9 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
     public UpgradeData CurrentUpgradeData { get; private set; }
     public int CurrentLevel { get; private set; } = 0;
 
-    // --- EKSİK OLAN VE GERİ EKLENEN DEĞİŞKENLER ---
-    // Bu binanın mevcut saniye başına altın üretimini tutar.
     private int currentGoldPerSecond = 0;
-    // Saniye sayacı için bir zamanlayıcı.
-    private float timer = 0f;
+    // 'timer' ve 'Update' metodu kaldırıldı.
 
-    // Animasyonlar için değişkenler
     private Sequence activeAnimationSequence;
     private Vector3 initialScale;
 
@@ -32,22 +28,7 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         initialScale = transform.localScale;
     }
 
-    /// <summary>
-    /// Her saniye pasif altın üretir ve görsel geri bildirimini tetikler.
-    /// </summary>
-    private void Update()
-    {
-        if (currentGoldPerSecond == 0) return;
-
-        timer += Time.deltaTime;
-
-        if (timer >= 1f)
-        {
-            GameManager.Instance.AddCoins(currentGoldPerSecond);
-            ShowIncomeFeedback(currentGoldPerSecond);
-            timer -= 1f;
-        }
-    }
+    // --- Update() METODU TAMAMEN KALDIRILDI ---
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -71,7 +52,7 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
     public void AdvanceToNextUpgrade()
     {
         currentGoldPerSecond += CurrentUpgradeData.goldPerSecondBonus;
-        StartActiveAnimation();
+        StartActiveAnimation(); // Animasyonu ve gelir döngüsünü başlat/güncelle.
 
         if (CurrentUpgradeData.nextUpgrade != null)
         {
@@ -85,6 +66,9 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Binanın sürekli "canlılık" animasyonunu ve senkronize gelir üretimini başlatır.
+    /// </summary>
     private void StartActiveAnimation()
     {
         if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
@@ -94,11 +78,26 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         transform.localScale = initialScale;
 
         activeAnimationSequence = DOTween.Sequence();
+
+        // Animasyon zincirini oluşturuyoruz.
         activeAnimationSequence.Append(transform.DOScale(new Vector3(initialScale.x * 1.1f, initialScale.y * 0.9f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
             .Append(transform.DOScale(new Vector3(initialScale.x * 0.9f, initialScale.y * 1.1f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
             .Append(transform.DOScale(initialScale, 0.5f).SetEase(Ease.InOutSine))
-            .AppendInterval(1f)
-            .SetLoops(-1);
+            .AppendInterval(0.3f) // Animasyonlar bittikten sonra kısa bir bekleme. Toplam süre yaklaşık 2 saniye.
+
+            // --- YENİ VE GÜNCELLENMİŞ MANTIK ---
+            // 'onStepComplete', her döngü tamamlandığında bu kod bloğunu çalıştırır.
+            .OnStepComplete(() =>
+            {
+                // Eğer bina hala gelir üretiyorsa...
+                if (currentGoldPerSecond > 0)
+                {
+                    // ...altını ekle ve kazanç metnini göster!
+                    GameManager.Instance.AddCoins(currentGoldPerSecond);
+                    ShowIncomeFeedback(currentGoldPerSecond);
+                }
+            })
+            .SetLoops(-1); // Sonsuz döngü.
     }
 
     private void ShowIncomeFeedback(int goldAmount)
