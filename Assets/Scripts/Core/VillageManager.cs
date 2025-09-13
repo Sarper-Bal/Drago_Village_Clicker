@@ -15,22 +15,19 @@ public class VillageManager : Singleton<VillageManager>
 
     private void OnEnable()
     {
+        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
+        GameManager.OnGameReady += BuildInitialBuildings; // Oyun başladığında ilk binaları inşa et.
         GameManager.OnLevelUp += OnPlayerLevelUp;
     }
 
     private void OnDisable()
     {
+        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
+        GameManager.OnGameReady -= BuildInitialBuildings;
         GameManager.OnLevelUp -= OnPlayerLevelUp;
     }
 
-    // --- YENİ EKLENEN METOT ---
-    // Start metodu, sahnedeki tüm Awake'ler bittikten sonra, ilk frame güncellenmeden önce bir kez çalışır.
-    // Bu, oyunun başlangıç durumunu kurmak için mükemmel bir yerdir.
-    private void Start()
-    {
-        // Oyun başladığında, 1. seviyeye ait binaları inşa etmek için bu fonksiyonu çağırıyoruz.
-        BuildInitialBuildings();
-    }
+    // --- Start() METODU SİLİNDİ ---
 
     private void FindAndRegisterAllSpawnPoints()
     {
@@ -40,42 +37,21 @@ public class VillageManager : Singleton<VillageManager>
             if (!string.IsNullOrEmpty(point.spawnPointID) && !spawnPoints.ContainsKey(point.spawnPointID))
             {
                 spawnPoints.Add(point.spawnPointID, point);
-                Debug.Log($"Spawn noktası kaydedildi: {point.spawnPointID}");
-            }
-            else
-            {
-                Debug.LogWarning($"Spawn noktası ID'si boş veya zaten mevcut: {point.name}", point.gameObject);
             }
         }
     }
 
-    // --- YENİ EKLENEN METOT ---
-    /// <summary>
-    /// Oyunun başlangıcında, mevcut seviyeye ait binaları inşa eder.
-    /// </summary>
     private void BuildInitialBuildings()
     {
-        // GameManager'dan başlangıç seviyesinin verilerini alıyoruz (Level 1).
         LevelData startingLevelData = GameManager.Instance.GetCurrentLevelData();
         if (startingLevelData == null) return;
-
-        // Eğer başlangıç seviyesinde inşa edilecek binalar varsa...
         if (startingLevelData.buildingsToUnlock.Length > 0)
         {
-            Debug.Log("Başlangıç binaları inşa ediliyor...");
-            // ...her birini sırayla inşa et.
             foreach (var buildingData in startingLevelData.buildingsToUnlock)
             {
-                // Zaten var olan BuildBuilding metodunu kullanıyoruz, ama bu sefer yükseltme kontrolü olmadan
-                // direkt inşa etmesi için InstantiateNewBuilding'i çağırıyoruz.
-                // Bu, oyun her başladığında temiz bir kurulum sağlar.
                 if (spawnPoints.TryGetValue(buildingData.spawnPointID, out BuildingSpawnPoint targetPoint))
                 {
                     InstantiateNewBuilding(buildingData, targetPoint);
-                }
-                else
-                {
-                    Debug.LogError($"Bina inşa edilemedi! Sahnede '{buildingData.spawnPointID}' ID'sine sahip bir spawn noktası bulunamadı.");
                 }
             }
         }
@@ -85,10 +61,8 @@ public class VillageManager : Singleton<VillageManager>
     {
         LevelData currentLevelData = GameManager.Instance.GetCurrentLevelData();
         if (currentLevelData == null) return;
-
         if (currentLevelData.buildingsToUnlock.Length > 0)
         {
-            Debug.Log($"{currentLevelData.levelDescription} seviyesine ulaşıldı. Binalar inşa ediliyor...");
             foreach (var buildingData in currentLevelData.buildingsToUnlock)
             {
                 BuildBuilding(buildingData);
@@ -102,7 +76,7 @@ public class VillageManager : Singleton<VillageManager>
         {
             if (activeBuildings.TryGetValue(dataToBuild.spawnPointID, out GameObject oldBuilding))
             {
-                oldBuilding.transform.DOKill(); // Animasyon çakışmasını önlemek için eski binanın animasyonlarını durdur.
+                oldBuilding.transform.DOKill();
                 oldBuilding.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
                 {
                     Destroy(oldBuilding);
@@ -113,10 +87,6 @@ public class VillageManager : Singleton<VillageManager>
             {
                 InstantiateNewBuilding(dataToBuild, targetPoint);
             }
-        }
-        else
-        {
-            Debug.LogError($"Bina inşa edilemedi! Sahnede '{dataToBuild.spawnPointID}' ID'sine sahip bir spawn noktası bulunamadı.");
         }
     }
 
@@ -132,5 +102,13 @@ public class VillageManager : Singleton<VillageManager>
         Vector3 originalScale = buildingObject.transform.localScale;
         buildingObject.transform.localScale = Vector3.zero;
         buildingObject.transform.DOScale(originalScale, 0.5f).SetEase(Ease.OutBack);
+    }
+
+    public void PlayAnimationOnBuilding(string buildingID)
+    {
+        if (activeBuildings.TryGetValue(buildingID, out GameObject building))
+        {
+            building.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f, 1, 0.5f);
+        }
     }
 }

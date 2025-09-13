@@ -1,5 +1,6 @@
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 public class DragonSpawner : MonoBehaviour
 {
@@ -11,27 +12,32 @@ public class DragonSpawner : MonoBehaviour
 
     private void OnEnable()
     {
-        GameManager.OnLevelUp += SpawnDragonForCurrentLevel;
+        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
+        GameManager.OnGameReady += SpawnNewDragon; // Oyun başladığında ilk ejderhayı yarat.
+        GameManager.OnLevelUp += HandleLevelUpEvent;
     }
 
     private void OnDisable()
     {
-        GameManager.OnLevelUp -= SpawnDragonForCurrentLevel;
+        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
+        GameManager.OnGameReady -= SpawnNewDragon;
+        GameManager.OnLevelUp -= HandleLevelUpEvent;
     }
 
-    void Start()
+    // --- Start() METODU SİLİNDİ ---
+
+    private void HandleLevelUpEvent()
     {
-        SpawnDragonForCurrentLevel();
+        StartCoroutine(LevelUpTransitionRoutine());
     }
 
-    private void SpawnDragonForCurrentLevel()
+    private IEnumerator LevelUpTransitionRoutine()
     {
         if (currentDragonInstance != null)
         {
             DragonController oldDragonController = currentDragonInstance.GetComponent<DragonController>();
             if (oldDragonController != null)
             {
-                // Hatanın olduğu yer burasıydı. Artık DragonController'da bu metot var.
                 oldDragonController.DestroyDragon();
             }
             else
@@ -40,6 +46,13 @@ public class DragonSpawner : MonoBehaviour
             }
         }
 
+        yield return null;
+
+        SpawnNewDragon();
+    }
+
+    private void SpawnNewDragon()
+    {
         LevelData levelData = GameManager.Instance.GetCurrentLevelData();
         if (levelData == null)
         {

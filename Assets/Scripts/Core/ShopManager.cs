@@ -1,51 +1,119 @@
 using UnityEngine;
-using System.Collections.Generic; // List kullanmak için bu kütüphane gerekli.
+using System.Collections.Generic;
+using UnityEngine.UI;
+using TMPro;
 
 public class ShopManager : Singleton<ShopManager>
 {
     [Header("Mağaza Ayarları")]
-    [Tooltip("Mağazada gösterilecek olan ilk seviye geliştirmelerin listesi.")]
     [SerializeField] private List<UpgradeData> initialUpgrades;
+    [SerializeField] private GameObject shopPanel;
+    [SerializeField] private Transform contentParent;
+    [SerializeField] private GameObject upgradeItemPrefab;
 
-    // TODO: Oyuncunun hangi geliştirmeleri satın aldığını ve hangi seviyede olduğunu tutacak bir kayıt sistemi eklenecek.
-    // Örneğin: private Dictionary<string, int> purchasedUpgradeLevels = new Dictionary<string, int>();
+    private Dictionary<string, UpgradeData> currentUpgrades = new Dictionary<string, UpgradeData>();
 
-    // TODO: Mağaza UI panelini açıp kapatacak fonksiyonlar eklenecek.
-    // public void OpenShopPanel() { ... }
-    // public void CloseShopPanel() { ... }
-
-    /// <summary>
-    /// Bir geliştirme satın alındığında çalışacak olan ana mantık.
-    /// UI'daki buton tarafından çağrılacak.
-    /// </summary>
-    /// <param name="upgradeToPurchase">Satın alınmak istenen geliştirmenin verisi.</param>
-    public void PurchaseUpgrade(UpgradeData upgradeToPurchase)
+    private void Start()
     {
-        // 1. Oyuncunun yeterli altını var mı diye kontrol et.
-        if (GameManager.Instance.TotalCoins < upgradeToPurchase.cost)
+        foreach (var upgrade in initialUpgrades)
         {
-            Debug.Log("Yeterli altın yok!");
-            // TODO: Oyuncuya "Yeterli Altın Yok" uyarısı göster.
+            if (!currentUpgrades.ContainsKey(upgrade.upgradeID))
+            {
+                currentUpgrades.Add(upgrade.upgradeID, upgrade);
+            }
+        }
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
+        }
+    }
+
+    public void OpenShopPanel()
+    {
+        if (shopPanel == null) return;
+        shopPanel.SetActive(true);
+        RefreshShop();
+    }
+
+    public void CloseShopPanel()
+    {
+        if (shopPanel == null) return;
+        shopPanel.SetActive(false);
+    }
+
+    private void RefreshShop()
+    {
+        if (contentParent == null || upgradeItemPrefab == null)
+        {
+            Debug.LogError("ShopManager'da Content Parent veya Upgrade Item Prefab'ı atanmamış!");
             return;
         }
 
-        // 2. Altını harca.
-        // TODO: GameManager'a altını düşmesi için bir komut gönderecek bir metot yazılmalı.
-        // GameManager.Instance.SpendGold(upgradeToPurchase.cost);
-
-        // 3. Pasif geliri artır.
-        PassiveIncomeManager.Instance.AddGoldPerSecond(upgradeToPurchase.goldPerSecondBonus);
-
-        // 4. Bina animasyonunu tetikle.
-        if (!string.IsNullOrEmpty(upgradeToPurchase.targetBuildingID))
+        foreach (Transform child in contentParent)
         {
-            // TODO: VillageManager'a animasyon oynatması için haber ver.
-            // VillageManager.Instance.PlayAnimationOnBuilding(upgradeToPurchase.targetBuildingID);
+            Destroy(child.gameObject);
         }
 
-        // 5. Satın alınan geliştirmeyi kaydet ve bir sonraki seviyeyi mağazada göstermek için hazırla.
-        // TODO: Geliştirme kayıt sistemi ve UI güncelleme mantığı eklenecek.
+        foreach (var upgrade in currentUpgrades.Values)
+        {
+            if (GameManager.Instance.CurrentLevelIndex + 1 >= upgrade.minPlayerLevel)
+            {
+                GameObject itemGO = Instantiate(upgradeItemPrefab, contentParent);
 
-        Debug.Log($"{upgradeToPurchase.upgradeName} satın alındı!");
+                // İkonu ayarla
+                Image iconImage = itemGO.transform.Find("Icon")?.GetComponent<Image>();
+                if (iconImage != null) iconImage.sprite = upgrade.icon;
+                else Debug.LogWarning($"Prefab'da 'Icon' objesi veya üzerinde Image bileşeni bulunamadı!");
+
+                // İsim metnini ayarla
+                TextMeshProUGUI nameText = itemGO.transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
+                if (nameText != null) nameText.text = upgrade.upgradeName;
+                else Debug.LogWarning($"Prefab'da 'NameText' objesi veya üzerinde TextMeshProUGUI bileşeni bulunamadı!");
+
+                // Açıklama metnini ayarla
+                TextMeshProUGUI descText = itemGO.transform.Find("DescriptionText")?.GetComponent<TextMeshProUGUI>();
+                if (descText != null) descText.text = upgrade.description;
+                else Debug.LogWarning($"Prefab'da 'DescriptionText' objesi veya üzerinde TextMeshProUGUI bileşeni bulunamadı!");
+
+                // Buton ve maliyet metnini ayarla
+                Button purchaseButton = itemGO.transform.Find("CostButton")?.GetComponent<Button>();
+                TextMeshProUGUI costText = purchaseButton?.transform.Find("CostText")?.GetComponent<TextMeshProUGUI>();
+
+                if (purchaseButton != null && costText != null)
+                {
+                    costText.text = upgrade.cost.ToString();
+                    purchaseButton.onClick.AddListener(() => PurchaseUpgrade(upgrade));
+                    purchaseButton.interactable = (GameManager.Instance.TotalCoins >= upgrade.cost);
+                }
+                else
+                {
+                    Debug.LogWarning($"Prefab'da 'CostButton' veya içinde 'CostText' objesi bulunamadı!");
+                }
+            }
+        }
+    }
+
+    public void PurchaseUpgrade(UpgradeData upgradeToPurchase)
+    {
+        if (GameManager.Instance.TotalCoins < upgradeToPurchase.cost) return;
+
+        GameManager.Instance.SpendGold(upgradeToPurchase.cost);
+        PassiveIncomeManager.Instance.AddGoldPerSecond(upgradeToPurchase.goldPerSecondBonus);
+
+        if (!string.IsNullOrEmpty(upgradeToPurchase.targetBuildingID))
+        {
+            VillageManager.Instance.PlayAnimationOnBuilding(upgradeToPurchase.targetBuildingID);
+        }
+
+        if (upgradeToPurchase.nextUpgrade != null)
+        {
+            currentUpgrades[upgradeToPurchase.upgradeID] = upgradeToPurchase.nextUpgrade;
+        }
+        else
+        {
+            currentUpgrades.Remove(upgradeToPurchase.upgradeID);
+        }
+
+        RefreshShop();
     }
 }
