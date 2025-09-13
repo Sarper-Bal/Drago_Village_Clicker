@@ -10,8 +10,7 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private Button levelUpButton;
 
-    [Header("Alt Bar Butonları")]
-    [SerializeField] private Button shopButton;
+    // Mağaza butonuyla ilgili alanlar ve fonksiyonlar kaldırıldı.
 
     private Sequence panelReadyPulseSequence;
     private bool isReadyForLevelUp = false;
@@ -20,7 +19,6 @@ public class UIManager : Singleton<UIManager>
     public override void Awake()
     {
         base.Awake();
-        // Panelin başlangıç boyutunu, animasyonlarda referans olarak kullanmak üzere saklıyoruz.
         if (levelUpPanel != null)
         {
             initialPanelScale = levelUpPanel.localScale;
@@ -44,8 +42,6 @@ public class UIManager : Singleton<UIManager>
     private void Start()
     {
         levelUpButton.onClick.AddListener(OnLevelUpButtonClicked);
-        shopButton.onClick.AddListener(OnShopButtonClicked);
-
         SetLevelUpReadyState(false);
         UpdateGoldUI();
     }
@@ -58,7 +54,6 @@ public class UIManager : Singleton<UIManager>
     private void SetLevelUpReadyState(bool isReady)
     {
         isReadyForLevelUp = isReady;
-
         if (isReady)
         {
             levelUpButton.interactable = true;
@@ -72,20 +67,11 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    /// <summary>
-    /// Ejderhaya tıklandığında panelde animasyon oynatır. Hatalı ChangeStartValue çağrısı kaldırıldı.
-    /// </summary>
     private void PlayClickAnimation()
     {
         if (isReadyForLevelUp) return;
-
-        // --- DÜZELTİLMİŞ BLOK ---
-        // 1. Önce, panel üzerinde çalışan tüm animasyonları anında durdur.
         levelUpPanel.DOKill();
-        // 2. Panelin boyutunu, animasyonun doğru başlaması için orijinal boyutuna sıfırla.
         levelUpPanel.localScale = initialPanelScale;
-
-        // 3. Şimdi "punch" animasyonunu güvenle başlat. Hatalı .ChangeStartValue() çağrısı kaldırıldı.
         levelUpPanel.DOPunchScale(new Vector3(0.1f, -0.1f, 0), 0.2f, 1, 0.5f);
     }
 
@@ -94,10 +80,7 @@ public class UIManager : Singleton<UIManager>
         GameManager.Instance.PerformLevelUp();
     }
 
-    private void OnShopButtonClicked()
-    {
-        ShopManager.Instance.OpenShopPanel();
-    }
+    // OnShopButtonClicked metodu kaldırıldı.
 
     private void StartReadyPulseAnimation()
     {
@@ -110,11 +93,13 @@ public class UIManager : Singleton<UIManager>
 
     private void StopReadyPulseAnimation()
     {
-        // Null referans hatası almamak için Sequence'in var olup olmadığını kontrol et.
         if (panelReadyPulseSequence != null && panelReadyPulseSequence.IsActive())
         {
             panelReadyPulseSequence.Kill();
         }
-        levelUpPanel.localScale = initialPanelScale;
+        if (levelUpPanel != null)
+        {
+            levelUpPanel.localScale = initialPanelScale;
+        }
     }
 }

@@ -8,7 +8,9 @@ public class PassiveIncomeManager : Singleton<PassiveIncomeManager>
     void Update()
     {
         if (totalGoldPerSecond == 0) return;
+
         timer += Time.deltaTime;
+
         if (timer >= 1f)
         {
             GameManager.Instance.AddCoins(totalGoldPerSecond);
@@ -16,8 +18,12 @@ public class PassiveIncomeManager : Singleton<PassiveIncomeManager>
         }
     }
 
+    /// <summary>
+    /// Toplam saniye başına altın kazancına yeni bir bonus ekler.
+    /// </summary>
     public void AddGoldPerSecond(int amount)
     {
         totalGoldPerSecond += amount;
+        Debug.Log($"Saniye Başına Kazanç {amount} arttı. Yeni Değer: {totalGoldPerSecond}");
     }
 }
