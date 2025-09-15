@@ -39,8 +39,6 @@ public class UIManager : Singleton<UIManager>
 
     private void Start()
     {
-        // Start içindeki UI güncellemeleri, OnGameReady sinyaliyle daha güvenli hale getirilebilir.
-        // Ama şimdilik bu şekilde çalışacaktır.
         levelUpButton.onClick.AddListener(OnLevelUpButtonClicked);
         SetLevelUpReadyState(false);
         UpdateGoldUI();

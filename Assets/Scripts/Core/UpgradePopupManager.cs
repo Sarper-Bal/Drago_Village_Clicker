@@ -59,8 +59,7 @@ public class UpgradePopupManager : Singleton<UpgradePopupManager>
         if (GameManager.Instance.TotalCoins >= upgradeData.cost)
         {
             GameManager.Instance.SpendGold(upgradeData.cost);
-
-            // Pasif gelir çağrısı kaldırıldı. Bu işi artık bina kendisi yapacak.
+            GameManager.Instance.IncrementBuildingLevel(upgradeData.upgradeID);
 
             if (!string.IsNullOrEmpty(upgradeData.targetBuildingID))
             {

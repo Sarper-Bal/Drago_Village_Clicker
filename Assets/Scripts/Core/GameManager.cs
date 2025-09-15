@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening; // DOTween'i kullanabilmek için bu kütüphaneyi ekliyoruz.
+using DG.Tweening;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -13,7 +13,6 @@ public class GameManager : Singleton<GameManager>
     public static event Action<bool> OnLevelUpReady;
 
     [Header("Genel Oyun Verileri")]
-    [Tooltip("Oyunda var olan tüm köylerin ana veri dosyaları buraya atanmalıdır.")]
     [SerializeField] private List<VillageData> allVillages;
 
     public int TotalCoins { get; private set; }
@@ -21,6 +20,7 @@ public class GameManager : Singleton<GameManager>
 
     private List<string> unlockedVillageIDs = new List<string>();
     private Dictionary<string, int> villageDragonLevels = new Dictionary<string, int>();
+    public Dictionary<string, Dictionary<string, int>> BuildingLevels { get; private set; } = new Dictionary<string, Dictionary<string, int>>();
     private string currentVillageID;
 
     private bool isReadyToLevelUp = false;
@@ -40,7 +40,6 @@ public class GameManager : Singleton<GameManager>
     {
         VillageData activeVillage = GetCurrentVillageData();
         if (activeVillage == null) return null;
-
         int dragonLevel = GetCurrentDragonLevel();
         if (dragonLevel >= 0 && dragonLevel < activeVillage.villageLevelProgression.Count)
         {
@@ -53,6 +52,35 @@ public class GameManager : Singleton<GameManager>
     {
         villageDragonLevels.TryGetValue(currentVillageID, out int level);
         return level;
+    }
+
+    public int GetBuildingLevel(string upgradeID)
+    {
+        if (BuildingLevels.TryGetValue(currentVillageID, out var villageBuildings))
+        {
+            if (villageBuildings.TryGetValue(upgradeID, out int level))
+            {
+                return level;
+            }
+        }
+        return 0;
+    }
+
+    public void IncrementBuildingLevel(string upgradeID)
+    {
+        if (!BuildingLevels.ContainsKey(currentVillageID))
+        {
+            BuildingLevels[currentVillageID] = new Dictionary<string, int>();
+        }
+        if (!BuildingLevels[currentVillageID].ContainsKey(upgradeID))
+        {
+            BuildingLevels[currentVillageID][upgradeID] = 1;
+        }
+        else
+        {
+            BuildingLevels[currentVillageID][upgradeID]++;
+        }
+        PassiveIncomeManager.Instance.RecalculateTotalIncome();
     }
 
     public void AddCoins(int amount)
@@ -79,7 +107,6 @@ public class GameManager : Singleton<GameManager>
 
         VillageData village = GetCurrentVillageData();
         LevelData currentLevel = GetCurrentDragonLevelData();
-
         if (village != null && currentLevel != null && GetCurrentDragonLevel() < village.villageLevelProgression.Count - 1)
         {
             if (TotalCoins >= currentLevel.goldToReachNextLevel)
@@ -116,28 +143,18 @@ public class GameManager : Singleton<GameManager>
     public void UnlockAndSwitchToVillage(VillageData villageToUnlock)
     {
         if (villageToUnlock == null || unlockedVillageIDs.Contains(villageToUnlock.villageID)) return;
-
         unlockedVillageIDs.Add(villageToUnlock.villageID);
         villageDragonLevels.Add(villageToUnlock.villageID, 0);
-
         SwitchToVillage(villageToUnlock.villageID);
     }
 
-    /// <summary>
-    /// Belirtilen ID'ye sahip köyün sahnesini yükler.
-    /// </summary>
     public void SwitchToVillage(string villageID)
     {
         VillageData village = allVillages.FirstOrDefault(v => v.villageID == villageID);
         if (village != null && !string.IsNullOrEmpty(village.sceneToLoad))
         {
             currentVillageID = village.villageID;
-
-            // --- YENİ EKLENEN SATIR ---
-            // Yeni sahneyi yüklemeden HEMEN ÖNCE, çalışan tüm DOTween animasyonlarını durdur.
-            // Bu, "Target is missing" hatasını tamamen engeller.
             DOTween.KillAll();
-
             SceneManager.LoadScene(village.sceneToLoad);
         }
     }
@@ -146,10 +163,9 @@ public class GameManager : Singleton<GameManager>
     {
         TotalCoins = 0;
         TotalClicks = 0;
-
         unlockedVillageIDs.Clear();
         villageDragonLevels.Clear();
-
+        BuildingLevels.Clear();
         if (allVillages.Count > 0)
         {
             VillageData firstVillage = allVillages[0];

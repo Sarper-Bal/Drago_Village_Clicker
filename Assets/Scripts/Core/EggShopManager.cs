@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class EggShopManager : Singleton<EggShopManager>
 {
     [Header("Dükkan Arayüz Elemanları")]
-    [Tooltip("Yumurta dükkanını gösteren ana panel.")]
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private Image eggImage;
     [SerializeField] private TextMeshProUGUI eggInfoText;
@@ -25,9 +24,6 @@ public class EggShopManager : Singleton<EggShopManager>
         }
     }
 
-    /// <summary>
-    /// Yumurta dükkanı panelini gösterir ve içini doldurur.
-    /// </summary>
     public void ShowShopPopup(List<DragonEggData> eggsForSale)
     {
         if (eggsForSale == null || eggsForSale.Count == 0) return;
@@ -37,8 +33,6 @@ public class EggShopManager : Singleton<EggShopManager>
         eggImage.sprite = currentEggForSale.eggSprite;
         eggInfoText.text = $"{currentEggForSale.eggName}\n<color=yellow>{currentEggForSale.cost:N0}</color>";
 
-        // --- GÜNCELLENMİŞ KONTROL ---
-        // Oyuncunun seviyesini artık yeni GameManager metodundan alıyoruz.
         bool canAfford = GameManager.Instance.TotalCoins >= currentEggForSale.cost;
         bool levelEnough = GameManager.Instance.GetCurrentDragonLevel() + 1 >= currentEggForSale.requiredPlayerLevel;
 
@@ -52,29 +46,19 @@ public class EggShopManager : Singleton<EggShopManager>
         currentEggForSale = null;
     }
 
-    /// <summary>
-    /// "Satın Al" butonuna tıklandığında çalışır ve yeni köy geçişini yönetir.
-    /// </summary>
     private void OnPurchaseButtonClicked()
     {
         if (currentEggForSale == null) return;
 
         if (GameManager.Instance.TotalCoins >= currentEggForSale.cost)
         {
-            // 1. Altını harca.
             GameManager.Instance.SpendGold(currentEggForSale.cost);
 
-            Debug.Log($"{currentEggForSale.eggName} satın alındı!");
-
-            // --- YENİ EKLENEN MANTIK ---
-            // 2. Satın alınan yumurtanın bir köy kilidi açıp açmadığını kontrol et.
             if (currentEggForSale.villageToUnlock != null)
             {
-                // 3. Eğer açıyorsa, GameManager'a yeni köyün kilidini açması ve oraya geçmesi için komut ver.
                 GameManager.Instance.UnlockAndSwitchToVillage(currentEggForSale.villageToUnlock);
             }
 
-            // 4. Paneli kapat.
             HideShopPopup();
         }
     }

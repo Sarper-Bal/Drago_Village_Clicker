@@ -16,14 +16,9 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     [SerializeField] private float scaleMultiplier = 1.15f;
     [SerializeField] private float shakeStrength = 0.1f;
 
-    [Header("Coin Fırlatma Efekti")]
-    [SerializeField] private GameObject coinFxPrefab;
-    // --- HATA VEREN SATIRIN DEĞİŞKENİ BURADA DOĞRU BİR ŞEKİLDE TANIMLANIYOR ---
-    [Tooltip("Coin'in fırlatılacağı alanın yarıçapı.")]
-    [SerializeField] private float coinSpawnRadius = 2f;
-
     [Header("Uçuşan Text Efekti")]
     [SerializeField] private GameObject floatingTextFxPrefab;
+    [SerializeField] private float textSpawnOffsetY = 1.0f;
 
     private Sequence clickSequence;
     private bool isDying = false;
@@ -63,32 +58,14 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
         int goldGained = dragonData.goldPerPress;
         GameManager.Instance.AddCoins(goldGained);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
-        SpawnCoinEffect();
         ShowFloatingTextEffect(goldGained);
         Debug.Log(gameObject.name + " tıklandı!");
-    }
-
-    private void SpawnCoinEffect()
-    {
-        if (coinFxPrefab == null) return;
-
-        // Hata veren satırın kendisi burada ve tamamen doğru.
-        // Yukarıda coinSpawnRadius tanımlandığı için artık hata vermeyecektir.
-        Vector2 randomCirclePoint = UnityEngine.Random.insideUnitCircle * coinSpawnRadius;
-        Vector3 targetPosition = transform.position + new Vector3(randomCirclePoint.x, randomCirclePoint.y, 0);
-
-        GameObject coinInstance = Instantiate(coinFxPrefab, transform.position, Quaternion.identity);
-        CoinFX coinFxScript = coinInstance.GetComponent<CoinFX>();
-        if (coinFxScript != null)
-        {
-            coinFxScript.Launch(targetPosition);
-        }
     }
 
     private void ShowFloatingTextEffect(int goldAmount)
     {
         if (floatingTextFxPrefab == null) return;
-        Vector3 spawnPosition = transform.position + Vector3.up * 0.5f;
+        Vector3 spawnPosition = transform.position + Vector3.up * textSpawnOffsetY;
         GameObject textInstance = Instantiate(floatingTextFxPrefab, spawnPosition, Quaternion.identity);
         FloatingTextFX textFxScript = textInstance.GetComponent<FloatingTextFX>();
         if (textFxScript != null)
