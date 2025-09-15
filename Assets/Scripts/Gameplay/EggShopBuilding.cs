@@ -1,8 +1,7 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // Tıklamayı algılamak için IPointerClickHandler arayüzü.
-using System.Collections.Generic; // Liste kullanmak için.
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
-// Bu script'in çalışması için bir Collider2D bileşeni zorunludur.
 [RequireComponent(typeof(Collider2D))]
 public class EggShopBuilding : MonoBehaviour, IPointerClickHandler
 {
@@ -22,8 +21,7 @@ public class EggShopBuilding : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        // TODO: Bir sonraki adımda oluşturacağımız EggShopManager'a haber ver.
-        // EggShopManager.Instance.ShowShopPopup(eggsForSale);
-        Debug.Log($"{gameObject.name} tıklandı. Ejderha Yumurtası Dükkanı açılacak.");
+        // EggShopManager'a haber ver ve satılacak yumurtaların listesini gönder.
+        EggShopManager.Instance.ShowShopPopup(eggsForSale);
     }
 }
