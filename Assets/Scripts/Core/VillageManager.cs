@@ -15,19 +15,15 @@ public class VillageManager : Singleton<VillageManager>
 
     private void OnEnable()
     {
-        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
-        GameManager.OnGameReady += BuildInitialBuildings; // Oyun başladığında ilk binaları inşa et.
+        GameManager.OnGameReady += BuildInitialBuildings;
         GameManager.OnLevelUp += OnPlayerLevelUp;
     }
 
     private void OnDisable()
     {
-        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
         GameManager.OnGameReady -= BuildInitialBuildings;
         GameManager.OnLevelUp -= OnPlayerLevelUp;
     }
-
-    // --- Start() METODU SİLİNDİ ---
 
     private void FindAndRegisterAllSpawnPoints()
     {
@@ -43,8 +39,11 @@ public class VillageManager : Singleton<VillageManager>
 
     private void BuildInitialBuildings()
     {
-        LevelData startingLevelData = GameManager.Instance.GetCurrentLevelData();
+        // --- DÜZELTME BURADA ---
+        // GameManager'daki metodun adı artık GetCurrentDragonLevelData.
+        LevelData startingLevelData = GameManager.Instance.GetCurrentDragonLevelData();
         if (startingLevelData == null) return;
+
         if (startingLevelData.buildingsToUnlock.Length > 0)
         {
             foreach (var buildingData in startingLevelData.buildingsToUnlock)
@@ -59,8 +58,11 @@ public class VillageManager : Singleton<VillageManager>
 
     private void OnPlayerLevelUp()
     {
-        LevelData currentLevelData = GameManager.Instance.GetCurrentLevelData();
+        // --- DÜZELTME BURADA ---
+        // GameManager'daki metodun adı artık GetCurrentDragonLevelData.
+        LevelData currentLevelData = GameManager.Instance.GetCurrentDragonLevelData();
         if (currentLevelData == null) return;
+
         if (currentLevelData.buildingsToUnlock.Length > 0)
         {
             foreach (var buildingData in currentLevelData.buildingsToUnlock)

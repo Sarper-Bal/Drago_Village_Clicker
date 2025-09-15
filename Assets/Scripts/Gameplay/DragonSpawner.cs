@@ -5,26 +5,21 @@ using System.Collections;
 public class DragonSpawner : MonoBehaviour
 {
     [Header("Spawner Ayarları")]
-    [Tooltip("Ejderhaların yaratılacağı konum.")]
     [SerializeField] private Transform spawnPoint;
 
     private GameObject currentDragonInstance;
 
     private void OnEnable()
     {
-        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
-        GameManager.OnGameReady += SpawnNewDragon; // Oyun başladığında ilk ejderhayı yarat.
+        GameManager.OnGameReady += SpawnNewDragon;
         GameManager.OnLevelUp += HandleLevelUpEvent;
     }
 
     private void OnDisable()
     {
-        // --- GÜNCELLENMİŞ OLAY DİNLEME ---
         GameManager.OnGameReady -= SpawnNewDragon;
         GameManager.OnLevelUp -= HandleLevelUpEvent;
     }
-
-    // --- Start() METODU SİLİNDİ ---
 
     private void HandleLevelUpEvent()
     {
@@ -53,10 +48,10 @@ public class DragonSpawner : MonoBehaviour
 
     private void SpawnNewDragon()
     {
-        LevelData levelData = GameManager.Instance.GetCurrentLevelData();
+        LevelData levelData = GameManager.Instance.GetCurrentDragonLevelData();
         if (levelData == null)
         {
-            Debug.LogError("Mevcut seviye için LevelData bulunamadı!");
+            Debug.LogError("Mevcut seviye için LevelData bulunamadı! GameManager'ın doğru köy verisini yüklediğinden emin olun.");
             return;
         }
 
@@ -77,6 +72,5 @@ public class DragonSpawner : MonoBehaviour
 
         currentDragonInstance.transform.localScale = Vector3.zero;
         currentDragonInstance.transform.DOScale(originalScale, 0.5f).SetEase(Ease.OutBack);
-        Debug.Log($"'{dragonData.dragonName}' yaratıldı.");
     }
 }

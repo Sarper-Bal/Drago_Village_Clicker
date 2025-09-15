@@ -16,3 +16,4 @@ MonoBehaviour:
   eggSprite: {fileID: 21300000, guid: 258b332fa74414c79bdaa18bba4b3b89, type: 3}
   cost: 10
   requiredPlayerLevel: 2
+  villageToUnlock: {fileID: 11400000, guid: 98aab6b1b168f4a7cb83d74d6e53a66f, type: 2}

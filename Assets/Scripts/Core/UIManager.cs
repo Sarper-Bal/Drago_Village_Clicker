@@ -10,8 +10,6 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private Button levelUpButton;
 
-    // Mağaza butonuyla ilgili alanlar ve fonksiyonlar kaldırıldı.
-
     private Sequence panelReadyPulseSequence;
     private bool isReadyForLevelUp = false;
     private Vector3 initialPanelScale;
@@ -41,6 +39,8 @@ public class UIManager : Singleton<UIManager>
 
     private void Start()
     {
+        // Start içindeki UI güncellemeleri, OnGameReady sinyaliyle daha güvenli hale getirilebilir.
+        // Ama şimdilik bu şekilde çalışacaktır.
         levelUpButton.onClick.AddListener(OnLevelUpButtonClicked);
         SetLevelUpReadyState(false);
         UpdateGoldUI();
@@ -79,8 +79,6 @@ public class UIManager : Singleton<UIManager>
     {
         GameManager.Instance.PerformLevelUp();
     }
-
-    // OnShopButtonClicked metodu kaldırıldı.
 
     private void StartReadyPulseAnimation()
     {

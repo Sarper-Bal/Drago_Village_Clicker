@@ -3018,10 +3018,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4777c89df31994bb7ad93f3a791884ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  levelProgression:
-  - {fileID: 11400000, guid: 9dcb518a7f5354c13ac8dd328ab65466, type: 2}
-  - {fileID: 11400000, guid: d9c3480d0fdb44272ab9a985b498fbc2, type: 2}
-  - {fileID: 11400000, guid: 15348b9e2eeb34985b79e868b0f07dba, type: 2}
+  allVillages:
+  - {fileID: 11400000, guid: 25ad7cd31bd32496b9810824a26fb6bb, type: 2}
+  - {fileID: 11400000, guid: 98aab6b1b168f4a7cb83d74d6e53a66f, type: 2}
 --- !u!4 &1410914684
 Transform:
   m_ObjectHideFlags: 0
@@ -4176,7 +4175,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1995772522
 RectTransform:
   m_ObjectHideFlags: 0

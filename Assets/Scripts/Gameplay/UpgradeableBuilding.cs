@@ -6,9 +6,11 @@ using DG.Tweening;
 public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
 {
     [Header("Geliştirme Zinciri")]
+    [Tooltip("Bu binanın ilk geliştirme seviyesini temsil eden veri dosyası.")]
     [SerializeField] private UpgradeData initialUpgradeData;
 
     [Header("Görsel Efektler")]
+    [Tooltip("Geliştirme sonrası kazancı göstermek için fırlatılacak olan text prefab'ı.")]
     [SerializeField] private GameObject floatingTextFxPrefab;
     [SerializeField] private float textSpawnOffsetY = 1.0f;
 
@@ -16,8 +18,7 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
     public int CurrentLevel { get; private set; } = 0;
 
     private int currentGoldPerSecond = 0;
-    // 'timer' ve 'Update' metodu kaldırıldı.
-
+    private float timer = 0f;
     private Sequence activeAnimationSequence;
     private Vector3 initialScale;
 
@@ -28,7 +29,19 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         initialScale = transform.localScale;
     }
 
-    // --- Update() METODU TAMAMEN KALDIRILDI ---
+    private void Update()
+    {
+        if (currentGoldPerSecond == 0) return;
+
+        timer += Time.deltaTime;
+
+        if (timer >= 1f)
+        {
+            GameManager.Instance.AddCoins(currentGoldPerSecond);
+            ShowIncomeFeedback(currentGoldPerSecond);
+            timer -= 1f;
+        }
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -38,7 +51,10 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        int playerLevel = GameManager.Instance.CurrentLevelIndex + 1;
+        // --- DÜZELTME BURADA ---
+        // GameManager'dan oyuncunun mevcut ejderha seviyesini eski değişken yerine yeni metot ile alıyoruz.
+        int playerLevel = GameManager.Instance.GetCurrentDragonLevel() + 1;
+
         if (playerLevel >= CurrentUpgradeData.minPlayerLevel)
         {
             UpgradePopupManager.Instance.ShowUpgradePopup(this);
@@ -52,7 +68,7 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
     public void AdvanceToNextUpgrade()
     {
         currentGoldPerSecond += CurrentUpgradeData.goldPerSecondBonus;
-        StartActiveAnimation(); // Animasyonu ve gelir döngüsünü başlat/güncelle.
+        StartActiveAnimation();
 
         if (CurrentUpgradeData.nextUpgrade != null)
         {
@@ -66,9 +82,6 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    /// <summary>
-    /// Binanın sürekli "canlılık" animasyonunu ve senkronize gelir üretimini başlatır.
-    /// </summary>
     private void StartActiveAnimation()
     {
         if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
@@ -78,26 +91,11 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         transform.localScale = initialScale;
 
         activeAnimationSequence = DOTween.Sequence();
-
-        // Animasyon zincirini oluşturuyoruz.
         activeAnimationSequence.Append(transform.DOScale(new Vector3(initialScale.x * 1.1f, initialScale.y * 0.9f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
             .Append(transform.DOScale(new Vector3(initialScale.x * 0.9f, initialScale.y * 1.1f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
             .Append(transform.DOScale(initialScale, 0.5f).SetEase(Ease.InOutSine))
-            .AppendInterval(0.3f) // Animasyonlar bittikten sonra kısa bir bekleme. Toplam süre yaklaşık 2 saniye.
-
-            // --- YENİ VE GÜNCELLENMİŞ MANTIK ---
-            // 'onStepComplete', her döngü tamamlandığında bu kod bloğunu çalıştırır.
-            .OnStepComplete(() =>
-            {
-                // Eğer bina hala gelir üretiyorsa...
-                if (currentGoldPerSecond > 0)
-                {
-                    // ...altını ekle ve kazanç metnini göster!
-                    GameManager.Instance.AddCoins(currentGoldPerSecond);
-                    ShowIncomeFeedback(currentGoldPerSecond);
-                }
-            })
-            .SetLoops(-1); // Sonsuz döngü.
+            .AppendInterval(1f)
+            .SetLoops(-1);
     }
 
     private void ShowIncomeFeedback(int goldAmount)
