@@ -119,55 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &41860162
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 41860164}
-  - component: {fileID: 41860163}
-  m_Layer: 0
-  m_Name: EggShopManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &41860163
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 41860162}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79f6dda5e27b4a0e9f6fa94d614dce6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EggShopManager
-  shopPanel: {fileID: 1995772521}
-  eggImage: {fileID: 1892941653}
-  eggInfoText: {fileID: 1587666218}
-  purchaseButton: {fileID: 1540386781}
-  closeButton: {fileID: 460764492}
---- !u!4 &41860164
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 41860162}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &60414876
 GameObject:
   m_ObjectHideFlags: 0
@@ -2343,57 +2294,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725578586}
   m_CullTransparentMesh: 1
---- !u!1 &751993895
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 751993897}
-  - component: {fileID: 751993896}
-  m_Layer: 0
-  m_Name: UpgradePopupManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &751993896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 751993895}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24d4347061f8c424ea894f2129c877e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UpgradePopupManager
-  popupPanel: {fileID: 1164572367}
-  upgradeIcon: {fileID: 725578588}
-  upgradeNameText: {fileID: 1479608286}
-  descriptionText: {fileID: 1852978501}
-  costText: {fileID: 503212236}
-  upgradeButton: {fileID: 1486633025}
-  closeButton: {fileID: 1005130372}
---- !u!4 &751993897
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 751993895}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &824702286
 GameObject:
   m_ObjectHideFlags: 0
@@ -2836,53 +2736,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1164572367}
   m_CullTransparentMesh: 1
---- !u!1 &1169356629
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1169356631}
-  - component: {fileID: 1169356630}
-  m_Layer: 0
-  m_Name: UIManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1169356630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1169356629}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 262b34487566d43dcb60487ab155599c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  levelUpPanel: {fileID: 170109410}
-  goldText: {fileID: 964703869}
-  levelUpButton: {fileID: 170109413}
---- !u!4 &1169356631
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1169356629}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1184479373
 GameObject:
   m_ObjectHideFlags: 0
@@ -2989,53 +2842,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1253691341}
   m_CullTransparentMesh: 1
---- !u!1 &1410914682
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1410914684}
-  - component: {fileID: 1410914683}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1410914683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1410914682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4777c89df31994bb7ad93f3a791884ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  allVillages:
-  - {fileID: 11400000, guid: 25ad7cd31bd32496b9810824a26fb6bb, type: 2}
-  - {fileID: 11400000, guid: 98aab6b1b168f4a7cb83d74d6e53a66f, type: 2}
---- !u!4 &1410914684
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1410914682}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1452961220
 GameObject:
   m_ObjectHideFlags: 0
@@ -3872,50 +3678,6 @@ Transform:
   - {fileID: 1602776973}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1846965842
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1846965844}
-  - component: {fileID: 1846965843}
-  m_Layer: 0
-  m_Name: VillageManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1846965843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1846965842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d082a1f3dd0646e18e9a9f60fc71be7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::VillageManager
---- !u!4 &1846965844
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1846965842}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1852978499
 GameObject:
   m_ObjectHideFlags: 0
@@ -4237,6 +3999,123 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1995772521}
   m_CullTransparentMesh: 1
+--- !u!1001 &3292899476978019313
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3173891497722829515, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_Name
+      value: '[MANAGERS]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: costText
+      value: 
+      objectReference: {fileID: 503212236}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: popupPanel
+      value: 
+      objectReference: {fileID: 1164572367}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: closeButton
+      value: 
+      objectReference: {fileID: 1005130372}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: upgradeIcon
+      value: 
+      objectReference: {fileID: 725578588}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: upgradeButton
+      value: 
+      objectReference: {fileID: 1486633025}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: descriptionText
+      value: 
+      objectReference: {fileID: 1852978501}
+    - target: {fileID: 3577261551731556612, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: upgradeNameText
+      value: 
+      objectReference: {fileID: 1479608286}
+    - target: {fileID: 6403260892806646347, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: goldText
+      value: 
+      objectReference: {fileID: 964703869}
+    - target: {fileID: 6403260892806646347, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: levelUpPanel
+      value: 
+      objectReference: {fileID: 170109410}
+    - target: {fileID: 6403260892806646347, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: levelUpButton
+      value: 
+      objectReference: {fileID: 170109413}
+    - target: {fileID: 7027349588163668471, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: eggImage
+      value: 
+      objectReference: {fileID: 1892941653}
+    - target: {fileID: 7027349588163668471, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: shopPanel
+      value: 
+      objectReference: {fileID: 1995772521}
+    - target: {fileID: 7027349588163668471, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: closeButton
+      value: 
+      objectReference: {fileID: 460764492}
+    - target: {fileID: 7027349588163668471, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: eggInfoText
+      value: 
+      objectReference: {fileID: 1587666218}
+    - target: {fileID: 7027349588163668471, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: purchaseButton
+      value: 
+      objectReference: {fileID: 1540386781}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8482827305356997784, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9fb7b0b7c0e63416fbf6b3b2c89146e1, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4246,11 +4125,7 @@ SceneRoots:
   - {fileID: 1888518710}
   - {fileID: 123437060}
   - {fileID: 1491516082}
-  - {fileID: 1410914684}
-  - {fileID: 1846965844}
-  - {fileID: 1169356631}
-  - {fileID: 751993897}
-  - {fileID: 41860164}
+  - {fileID: 3292899476978019313}
   - {fileID: 1184479374}
   - {fileID: 1727935394}
   - {fileID: 1749624170}
