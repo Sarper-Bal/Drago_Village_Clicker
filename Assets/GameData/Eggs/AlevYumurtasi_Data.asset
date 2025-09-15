@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: AlevYumurtasi_Data
   m_EditorClassIdentifier: Assembly-CSharp::DragonEggData
   eggName: "S\u0131radan Yumurta"
-  eggSprite: {fileID: 0}
+  eggSprite: {fileID: 21300000, guid: 258b332fa74414c79bdaa18bba4b3b89, type: 3}
   cost: 10
   requiredPlayerLevel: 2
