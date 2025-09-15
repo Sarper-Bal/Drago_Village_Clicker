@@ -2,11 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
-using UnityEngine.SceneManagement; // Sahne yönetimi için bu kütüphane gerekli.
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class UIManager : Singleton<UIManager>
 {
-    // Değişkenler artık public değil, çünkü onları kod ile bulacağız.
     private RectTransform levelUpPanel;
     private TextMeshProUGUI goldText;
     private Button levelUpButton;
@@ -20,7 +20,6 @@ public class UIManager : Singleton<UIManager>
         GameManager.OnStatsChanged += UpdateGoldUI;
         GameManager.OnLevelUpReady += SetLevelUpReadyState;
         DragonController.OnDragonClicked += PlayClickAnimation;
-        // Yeni bir sahne yüklendiğinde OnSceneLoaded metodunu çağır.
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -29,45 +28,44 @@ public class UIManager : Singleton<UIManager>
         GameManager.OnStatsChanged -= UpdateGoldUI;
         GameManager.OnLevelUpReady -= SetLevelUpReadyState;
         DragonController.OnDragonClicked -= PlayClickAnimation;
-        // Dinlemeyi bırakmayı unutmuyoruz.
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    /// <summary>
-    /// Yeni bir sahne yüklendiğinde çalışır ve UI referanslarını yeniden bulur.
-    /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Sahnedeki Canvas'ı bul.
-        Canvas canvas = FindObjectOfType<Canvas>();
+        StartCoroutine(InitializeUIAfterSceneLoad());
+    }
+
+    private IEnumerator InitializeUIAfterSceneLoad()
+    {
+        yield return null;
+
+        // Sahnedeki Canvas'ı bulmak için yeni ve önerilen metodu kullan.
+        Canvas canvas = FindFirstObjectByType<Canvas>(); // <-- DEĞİŞİKLİK BURADA
         if (canvas != null)
         {
-            // Canvas'ın altındaki UI elemanlarını isimleriyle bulup ata.
-            // Bu isimlerin Hiyerarşi'deki isimlerle eşleştiğinden emin ol!
             levelUpPanel = canvas.transform.Find("LevelUp_Panel")?.GetComponent<RectTransform>();
             if (levelUpPanel != null)
             {
                 goldText = levelUpPanel.transform.Find("Progress_Text")?.GetComponent<TextMeshProUGUI>();
                 levelUpButton = levelUpPanel.GetComponent<Button>();
 
-                // Butonun olayını yeniden bağla.
                 if (levelUpButton != null)
                 {
                     levelUpButton.onClick.RemoveAllListeners();
                     levelUpButton.onClick.AddListener(OnLevelUpButtonClicked);
                 }
 
-                // Başlangıç boyutunu kaydet ve UI'ı ilk değerlerle güncelle.
                 initialPanelScale = levelUpPanel.localScale;
                 UpdateGoldUI();
-                SetLevelUpReadyState(false); // Yeni sahnede butonu sıfırla.
+                SetLevelUpReadyState(false);
             }
         }
     }
 
     private void UpdateGoldUI()
     {
-        if (goldText == null) return; // Referans henüz bulunmadıysa hata vermesini engelle.
+        if (goldText == null) return;
         goldText.text = GameManager.Instance.TotalCoins.ToString("N0");
     }
 
@@ -75,9 +73,6 @@ public class UIManager : Singleton<UIManager>
     {
         GameManager.Instance.PerformLevelUp();
     }
-
-    // Geri kalan tüm metotlar (SetLevelUpReadyState, PlayClickAnimation, StartReadyPulseAnimation, StopReadyPulseAnimation)
-    // aynı kalıyor. Onları buraya eklemiyorum ama script'inizde olmalılar.
 
     private void SetLevelUpReadyState(bool isReady)
     {

@@ -18,6 +18,6 @@ MonoBehaviour:
   icon: {fileID: 0}
   cost: 20
   minPlayerLevel: 3
-  goldPerSecondBonus: 4
+  goldPerSecondBonus: 10000
   targetBuildingID: Well_Spot
   nextUpgrade: {fileID: 11400000, guid: f2f114a33849f4f29a3d3c3bf5baddf2, type: 2}
