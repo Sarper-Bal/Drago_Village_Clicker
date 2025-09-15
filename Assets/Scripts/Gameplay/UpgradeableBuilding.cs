@@ -6,11 +6,9 @@ using DG.Tweening;
 public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
 {
     [Header("Geliştirme Zinciri")]
-    [Tooltip("Bu binanın ilk geliştirme seviyesini temsil eden veri dosyası.")]
     [SerializeField] private UpgradeData initialUpgradeData;
 
     [Header("Görsel Efektler")]
-    [Tooltip("Geliştirme sonrası kazancı göstermek için fırlatılacak olan text prefab'ı.")]
     [SerializeField] private GameObject floatingTextFxPrefab;
     [SerializeField] private float textSpawnOffsetY = 1.0f;
 
@@ -19,7 +17,6 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
 
     private int currentGoldPerSecond = 0;
     private float timer = 0f;
-    private Sequence activeAnimationSequence;
     private Vector3 initialScale;
 
     private void Awake()
@@ -29,16 +26,28 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         initialScale = transform.localScale;
     }
 
+    /// <summary>
+    /// Her saniye pasif altın üretir ve SENKRONİZE bir şekilde görsel efektleri tetikler.
+    /// </summary>
     private void Update()
     {
+        // Eğer bina pasif altın üretmiyorsa, bu metodu çalıştırma.
         if (currentGoldPerSecond == 0) return;
 
+        // Zamanlayıcıyı artır.
         timer += Time.deltaTime;
 
+        // Her 1 saniyede bir...
         if (timer >= 1f)
         {
+            // 1. Altını ekle.
             GameManager.Instance.AddCoins(currentGoldPerSecond);
+            // 2. Kazanç metnini göster.
             ShowIncomeFeedback(currentGoldPerSecond);
+            // 3. Jöle animasyonunun BİR döngüsünü oynat.
+            PlayActiveAnimation();
+
+            // Zamanlayıcıyı sıfırla.
             timer -= 1f;
         }
     }
@@ -51,10 +60,7 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        // --- DÜZELTME BURADA ---
-        // GameManager'dan oyuncunun mevcut ejderha seviyesini eski değişken yerine yeni metot ile alıyoruz.
         int playerLevel = GameManager.Instance.GetCurrentDragonLevel() + 1;
-
         if (playerLevel >= CurrentUpgradeData.minPlayerLevel)
         {
             UpgradePopupManager.Instance.ShowUpgradePopup(this);
@@ -67,8 +73,9 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
 
     public void AdvanceToNextUpgrade()
     {
+        // Geliştirme yapıldığında, binanın saniye başına gelirini artır.
+        // Bu, Update metodundaki döngüyü otomatik olarak başlatacak.
         currentGoldPerSecond += CurrentUpgradeData.goldPerSecondBonus;
-        StartActiveAnimation();
 
         if (CurrentUpgradeData.nextUpgrade != null)
         {
@@ -82,20 +89,20 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    private void StartActiveAnimation()
+    /// <summary>
+    /// Binanın yanlardan sıkışıp uzadığı "canlılık" animasyonunun TEK BİR döngüsünü oynatır.
+    /// </summary>
+    private void PlayActiveAnimation()
     {
-        if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
-        {
-            activeAnimationSequence.Kill();
-        }
+        // Önceki animasyonların çakışmaması için çalışanları durdur ve boyutu sıfırla.
+        transform.DOKill();
         transform.localScale = initialScale;
 
-        activeAnimationSequence = DOTween.Sequence();
-        activeAnimationSequence.Append(transform.DOScale(new Vector3(initialScale.x * 1.1f, initialScale.y * 0.9f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
-            .Append(transform.DOScale(new Vector3(initialScale.x * 0.9f, initialScale.y * 1.1f, initialScale.z), 0.6f).SetEase(Ease.InOutSine))
-            .Append(transform.DOScale(initialScale, 0.5f).SetEase(Ease.InOutSine))
-            .AppendInterval(1f)
-            .SetLoops(-1);
+        // Yeni bir animasyon zinciri oluştur.
+        DOTween.Sequence()
+            .Append(transform.DOScale(new Vector3(initialScale.x * 1.1f, initialScale.y * 0.9f, initialScale.z), 0.2f).SetEase(Ease.InOutSine))
+            .Append(transform.DOScale(new Vector3(initialScale.x * 0.9f, initialScale.y * 1.1f, initialScale.z), 0.3f).SetEase(Ease.InOutSine))
+            .Append(transform.DOScale(initialScale, 0.2f).SetEase(Ease.OutSine));
     }
 
     private void ShowIncomeFeedback(int goldAmount)
@@ -112,11 +119,10 @@ public class UpgradeableBuilding : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // OnDestroy metodu artık sürekli bir animasyonu durdurmak zorunda olmadığı için kaldırılabilir veya
+    // gelecekteki olası temizlik işlemleri için boş bırakılabilir. Şimdilik temizlik için bırakıyoruz.
     private void OnDestroy()
     {
-        if (activeAnimationSequence != null && activeAnimationSequence.IsActive())
-        {
-            activeAnimationSequence.Kill();
-        }
+        transform.DOKill();
     }
 }

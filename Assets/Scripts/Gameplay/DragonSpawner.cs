@@ -11,6 +11,7 @@ public class DragonSpawner : MonoBehaviour
 
     private void OnEnable()
     {
+        // GameManager hazır olduğunda ilk ejderhayı yarat.
         GameManager.OnGameReady += SpawnNewDragon;
         GameManager.OnLevelUp += HandleLevelUpEvent;
     }
@@ -51,7 +52,7 @@ public class DragonSpawner : MonoBehaviour
         LevelData levelData = GameManager.Instance.GetCurrentDragonLevelData();
         if (levelData == null)
         {
-            Debug.LogError("Mevcut seviye için LevelData bulunamadı! GameManager'ın doğru köy verisini yüklediğinden emin olun.");
+            Debug.LogError("Mevcut ejderha seviyesi için LevelData bulunamadı! GameManager'daki VillageData'nın doğru atandığından emin olun.");
             return;
         }
 

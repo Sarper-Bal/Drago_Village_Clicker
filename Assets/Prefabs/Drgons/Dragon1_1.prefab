@@ -147,3 +147,4 @@ MonoBehaviour:
   coinFxPrefab: {fileID: 7362585257608200534, guid: 93243c613956a425c906342d9e0a81e3, type: 3}
   coinSpawnRadius: 2
   floatingTextFxPrefab: {fileID: 116957585993845926, guid: 6e034324e86614bbe85930bcc731c92e, type: 3}
+  textSpawnOffsetY: 1

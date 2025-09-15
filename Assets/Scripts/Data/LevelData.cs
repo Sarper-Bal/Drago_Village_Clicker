@@ -1,16 +1,19 @@
 using UnityEngine;
 
+// Bu script, bir ejderha seviyesinin özelliklerini ve o seviyede açılacak binaları tanımlar.
 [CreateAssetMenu(fileName = "NewLevelData", menuName = "Game/Level Data")]
 public class LevelData : ScriptableObject
 {
-    [Header("Seviye İlerleme Bilgisi")]
+    [Header("Seviye Kimliği")]
     public string levelDescription = "Seviye 1";
+
+    [Header("Seviye Atlama Koşulu")]
     public int goldToReachNextLevel = 100;
 
-    [Header("Seviye İçeriği")]
+    [Header("Ejderha Bilgisi")]
     public DragonData dragonDataForThisLevel;
 
-    // --- YENİ SATIR AŞAĞIDA ---
+    // --- EKSİK OLAN VE GERİ EKLENEN ALAN ---
     [Header("Bu Seviyede Açılacak Binalar")]
-    public BuildingUnlockData[] buildingsToUnlock; // O seviyeye ulaşıldığında inşa edilecek binaların listesi.
+    public BuildingUnlockData[] buildingsToUnlock;
 }

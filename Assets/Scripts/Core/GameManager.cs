@@ -54,34 +54,35 @@ public class GameManager : Singleton<GameManager>
         return level;
     }
 
-    public int GetBuildingLevel(string upgradeID)
-    {
-        if (BuildingLevels.TryGetValue(currentVillageID, out var villageBuildings))
-        {
-            if (villageBuildings.TryGetValue(upgradeID, out int level))
-            {
-                return level;
-            }
-        }
-        return 0;
-    }
-
+    // --- EKSİK OLAN VE GERİ EKLENEN METOT ---
+    /// <summary>
+    /// Bir binanın seviyesini genel kayıtlarda bir artırır.
+    /// </summary>
     public void IncrementBuildingLevel(string upgradeID)
     {
+        // O anki köy için bir kayıt yoksa, oluştur.
         if (!BuildingLevels.ContainsKey(currentVillageID))
         {
             BuildingLevels[currentVillageID] = new Dictionary<string, int>();
         }
+        // O bina için bir kayıt yoksa, seviyesini 1 yap.
         if (!BuildingLevels[currentVillageID].ContainsKey(upgradeID))
         {
             BuildingLevels[currentVillageID][upgradeID] = 1;
         }
         else
         {
+            // Eğer varsa, seviyesini bir artır.
             BuildingLevels[currentVillageID][upgradeID]++;
         }
-        PassiveIncomeManager.Instance.RecalculateTotalIncome();
+
+        // Pasif gelirin yeniden hesaplanması için sinyal gönder.
+        if (PassiveIncomeManager.Instance != null)
+        {
+            PassiveIncomeManager.Instance.RecalculateTotalIncome();
+        }
     }
+
 
     public void AddCoins(int amount)
     {

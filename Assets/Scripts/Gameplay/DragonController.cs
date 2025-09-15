@@ -16,7 +16,9 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
     [SerializeField] private float scaleMultiplier = 1.15f;
     [SerializeField] private float shakeStrength = 0.1f;
 
-    [Header("Uçuşan Text Efekti")]
+    [Header("Görsel Efektler")]
+    [SerializeField] private GameObject coinFxPrefab;
+    [SerializeField] private float coinSpawnRadius = 2f;
     [SerializeField] private GameObject floatingTextFxPrefab;
     [SerializeField] private float textSpawnOffsetY = 1.0f;
 
@@ -58,8 +60,26 @@ public class DragonController : MonoBehaviour, IPointerClickHandler
         int goldGained = dragonData.goldPerPress;
         GameManager.Instance.AddCoins(goldGained);
         GameManager.Instance.AddClicks(dragonData.clicksPerPress);
+
+        SpawnCoinEffect();
         ShowFloatingTextEffect(goldGained);
+
         Debug.Log(gameObject.name + " tıklandı!");
+    }
+
+    private void SpawnCoinEffect()
+    {
+        if (coinFxPrefab == null) return;
+        Vector2 randomCirclePoint = UnityEngine.Random.insideUnitCircle * coinSpawnRadius;
+        Vector3 targetPosition = transform.position + new Vector3(randomCirclePoint.x, randomCirclePoint.y, 0);
+        GameObject coinInstance = Instantiate(coinFxPrefab, transform.position, Quaternion.identity);
+
+        // Artık bu script'i bulabilecek.
+        CoinFX coinFxScript = coinInstance.GetComponent<CoinFX>();
+        if (coinFxScript != null)
+        {
+            coinFxScript.Launch(targetPosition);
+        }
     }
 
     private void ShowFloatingTextEffect(int goldAmount)
