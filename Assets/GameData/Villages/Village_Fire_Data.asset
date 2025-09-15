@@ -15,4 +15,5 @@ MonoBehaviour:
   villageID: village_fire
   villageName: Alev Vadisi
   sceneToLoad: Village_Fire
-  villageLevelProgression: []
+  villageLevelProgression:
+  - {fileID: 11400000, guid: ad14a831aadeb4788b1cad54a563d214, type: 2}

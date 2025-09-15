@@ -1,6 +1,8 @@
 using UnityEngine;
+using System.Collections; // Coroutine için bu kütüphane gerekli.
 using System.Collections.Generic;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 public class VillageManager : Singleton<VillageManager>
 {
@@ -10,20 +12,43 @@ public class VillageManager : Singleton<VillageManager>
     public override void Awake()
     {
         base.Awake();
-        FindAndRegisterAllSpawnPoints();
     }
 
     private void OnEnable()
     {
-        // GameManager hazır olduğunda başlangıç binalarını inşa et.
-        GameManager.OnGameReady += BuildInitialBuildings;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         GameManager.OnLevelUp += OnPlayerLevelUp;
     }
 
     private void OnDisable()
     {
-        GameManager.OnGameReady -= BuildInitialBuildings;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         GameManager.OnLevelUp -= OnPlayerLevelUp;
+    }
+
+    /// <summary>
+    /// Yeni bir sahne yüklendiğinde çalışır.
+    /// </summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Sahnenin tam olarak yüklenmesini ve tüm objelerin hazır olmasını
+        // garantilemek için bir frame bekleyen Coroutine'i başlat.
+        StartCoroutine(InitializeVillageAfterSceneLoad());
+    }
+
+    private IEnumerator InitializeVillageAfterSceneLoad()
+    {
+        // 1 frame bekleyerek tüm diğer scriptlerin Awake/OnEnable işlemlerini tamamlamasına izin ver.
+        yield return null;
+
+        // Yeni sahneye geçildiğinde eski verileri temizle.
+        spawnPoints.Clear();
+        activeBuildings.Clear();
+
+        // Yeni sahnedeki spawn noktalarını bul ve kaydet.
+        FindAndRegisterAllSpawnPoints();
+        // Yeni sahnenin başlangıç binalarını inşa et.
+        BuildInitialBuildings();
     }
 
     private void FindAndRegisterAllSpawnPoints()

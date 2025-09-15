@@ -1,6 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class DragonSpawner : MonoBehaviour
 {
@@ -11,15 +12,38 @@ public class DragonSpawner : MonoBehaviour
 
     private void OnEnable()
     {
-        // GameManager hazır olduğunda ilk ejderhayı yarat.
-        GameManager.OnGameReady += SpawnNewDragon;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         GameManager.OnLevelUp += HandleLevelUpEvent;
     }
 
     private void OnDisable()
     {
-        GameManager.OnGameReady -= SpawnNewDragon;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         GameManager.OnLevelUp -= HandleLevelUpEvent;
+    }
+
+    /// <summary>
+    /// Yeni bir sahne yüklendiğinde çalışır.
+    /// </summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Sahnenin tam olarak yüklenmesini ve tüm objelerin hazır olmasını
+        // garantilemek için bir frame bekleyen Coroutine'i başlat.
+        StartCoroutine(InitializeDragonAfterSceneLoad());
+    }
+
+    private IEnumerator InitializeDragonAfterSceneLoad()
+    {
+        // 1 frame bekleyerek tüm diğer scriptlerin Awake/OnEnable işlemlerini tamamlamasına izin ver.
+        yield return null;
+
+        // Başka bir sahneden geliniyorsa, mevcut ejderhayı yok et.
+        if (currentDragonInstance != null)
+        {
+            Destroy(currentDragonInstance);
+        }
+        // Yeni sahnenin ejderhasını oluştur.
+        SpawnNewDragon();
     }
 
     private void HandleLevelUpEvent()
@@ -42,7 +66,7 @@ public class DragonSpawner : MonoBehaviour
             }
         }
 
-        yield return null;
+        yield return new WaitForSeconds(0.3f); // Ejderhanın yok olma animasyonuna zaman tanı.
 
         SpawnNewDragon();
     }
