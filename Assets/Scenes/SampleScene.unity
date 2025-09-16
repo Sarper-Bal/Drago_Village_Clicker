@@ -4282,9 +4282,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262b34487566d43dcb60487ab155599c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  levelUpPanel: {fileID: 170109410}
-  goldText: {fileID: 964703869}
-  levelUpButton: {fileID: 170109413}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
