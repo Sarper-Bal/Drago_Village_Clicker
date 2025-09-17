@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement; // Sahne yönetimi için eklendi.
 
 public class PassiveIncomeManager : Singleton<PassiveIncomeManager>
 {
@@ -10,15 +11,24 @@ public class PassiveIncomeManager : Singleton<PassiveIncomeManager>
     private int totalGoldPerSecond = 0;
     private float timer = 0f;
 
+    // --- YENİ EKLENEN: Sahnedeki binaların listesini tutacak. ---
+    private List<UpgradeableBuilding> activeBuildingsInScene = new List<UpgradeableBuilding>();
+
     private void OnEnable()
     {
-        // Oyun başladığında ilk hesaplamayı yap.
-        GameManager.OnGameReady += RecalculateTotalIncome;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnDisable()
     {
-        GameManager.OnGameReady -= RecalculateTotalIncome;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Yeni sahne yüklendiğinde, binaları bul ve geliri yeniden hesapla.
+        FindAllUpgradeableBuildings();
+        RecalculateTotalIncome();
     }
 
     void Update()
@@ -28,48 +38,62 @@ public class PassiveIncomeManager : Singleton<PassiveIncomeManager>
         if (timer >= 1f)
         {
             GameManager.Instance.AddCoins(totalGoldPerSecond);
+
+            // --- YENİ EKLENEN: Her altın eklendiğinde animasyonları tetikle. ---
+            TriggerBuildingAnimations();
+
             timer -= 1f;
         }
     }
 
-    /// <summary>
-    /// GameManager'daki kayıtlara bakarak toplam saniye başına altın kazancını yeniden hesaplar.
-    /// </summary>
+    // --- YENİ METOT: Sahnedeki tüm geliştirilebilir binaları bulur. ---
+    private void FindAllUpgradeableBuildings()
+    {
+        activeBuildingsInScene.Clear();
+        activeBuildingsInScene.AddRange(FindObjectsByType<UpgradeableBuilding>(FindObjectsSortMode.None));
+    }
+
+    // --- YENİ METOT: Tüm binaların animasyonunu oynatır. ---
+    private void TriggerBuildingAnimations()
+    {
+        foreach (var building in activeBuildingsInScene)
+        {
+            building.PlayActiveAnimation();
+        }
+    }
+
     public void RecalculateTotalIncome()
     {
         totalGoldPerSecond = 0;
 
-        // GameManager'daki tüm bina seviyesi kayıtlarını gez.
-        foreach (var villageEntry in GameManager.Instance.BuildingLevels)
+        VillageData currentVillage = GameManager.Instance.GetCurrentVillageData();
+        if (currentVillage == null) return;
+
+        string currentVillageID = currentVillage.villageID;
+
+        if (GameManager.Instance.BuildingLevels.TryGetValue(currentVillageID, out var currentVillageBuildings))
         {
-            foreach (var buildingEntry in villageEntry.Value)
+            foreach (var buildingEntry in currentVillageBuildings)
             {
                 string upgradeID = buildingEntry.Key;
                 int level = buildingEntry.Value;
-
-                // Bu binanın tüm seviyelerinin gelirlerini topla.
                 totalGoldPerSecond += GetTotalIncomeForUpgrade(upgradeID, level);
             }
         }
         Debug.Log($"Toplam Saniye Başına Gelir Yeniden Hesaplandı: {totalGoldPerSecond}");
     }
 
-    /// <summary>
-    /// Belirli bir geliştirmenin, belirtilen seviyeye kadar olan TÜM gelirlerini toplar.
-    /// </summary>
     private int GetTotalIncomeForUpgrade(string upgradeID, int currentLevel)
     {
         int income = 0;
-        // Tüm geliştirme verileri listesinden bu ID'ye ait olan ilk seviyeyi bul.
         UpgradeData currentUpgradeData = allUpgrades.Find(u => u.upgradeID == upgradeID);
 
-        // Bulunan ilk seviyeden başlayarak, mevcut seviyeye kadar olan tüm bonusları topla.
         for (int i = 0; i < currentLevel; i++)
         {
             if (currentUpgradeData != null)
             {
                 income += currentUpgradeData.goldPerSecondBonus;
-                currentUpgradeData = currentUpgradeData.nextUpgrade; // Bir sonraki seviyeye geç.
+                currentUpgradeData = currentUpgradeData.nextUpgrade;
             }
         }
         return income;

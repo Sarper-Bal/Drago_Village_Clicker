@@ -15,6 +15,7 @@ MonoBehaviour:
   villageID: village_default
   villageName: "Ba\u015Flang\u0131\xE7 K\xF6y\xFC"
   sceneToLoad: 'SampleScene '
+  goldToCompleteVillage: 10
   villageLevelProgression:
   - {fileID: 11400000, guid: 9dcb518a7f5354c13ac8dd328ab65466, type: 2}
   - {fileID: 11400000, guid: d9c3480d0fdb44272ab9a985b498fbc2, type: 2}

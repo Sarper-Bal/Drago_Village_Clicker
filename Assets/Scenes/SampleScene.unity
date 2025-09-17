@@ -4109,27 +4109,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradePopupManager
   popupPanel: {fileID: 1164572367}
-  upgradeIcon: {fileID: 725578588}
   upgradeNameText: {fileID: 1479608286}
   descriptionText: {fileID: 1852978501}
   costText: {fileID: 503212236}
+  iconImage: {fileID: 0}
   upgradeButton: {fileID: 1486633025}
   closeButton: {fileID: 1005130372}
---- !u!4 &2910575589137585821
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5210279135126958539}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &3192303263967224720
 Transform:
   m_ObjectHideFlags: 0
@@ -4145,23 +4130,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &5210279135126958539
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2910575589137585821}
-  - component: {fileID: 5491176124511912454}
-  m_Layer: 0
-  m_Name: EggShopManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &5322138371707133541
 GameObject:
   m_ObjectHideFlags: 0
@@ -4179,23 +4147,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &5491176124511912454
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5210279135126958539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79f6dda5e27b4a0e9f6fa94d614dce6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EggShopManager
-  shopPanel: {fileID: 1995772521}
-  eggImage: {fileID: 1892941653}
-  eggInfoText: {fileID: 1587666218}
-  purchaseButton: {fileID: 1540386781}
-  closeButton: {fileID: 460764492}
 --- !u!114 &5603009401818520750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4295,7 +4246,6 @@ SceneRoots:
   - {fileID: 5960728313397965041}
   - {fileID: 8131611179751573404}
   - {fileID: 3192303263967224720}
-  - {fileID: 2910575589137585821}
   - {fileID: 408771348}
   - {fileID: 1184479374}
   - {fileID: 1727935394}

@@ -1,21 +1,20 @@
 using UnityEngine;
-using System.Collections.Generic; // List kullanmak için bu kütüphane gerekli.
+using System.Collections.Generic;
 
+// Bu script, bir köyün tüm verilerini bir arada tutar.
 [CreateAssetMenu(fileName = "NewVillageData", menuName = "Game/Village Data")]
 public class VillageData : ScriptableObject
 {
     [Header("Köy Kimliği")]
-    [Tooltip("Köyün benzersiz kimliği. Kayıt sisteminde kullanılacak.")]
-    public string villageID;
-    [Tooltip("Arayüzde görünecek köy adı.")]
-    public string villageName = "Yeni Köy";
+    public string villageID = "default_village"; // Kayıt ve referans için benzersiz kimlik.
+    public string villageName = "Ejderha Köyü"; // Oyuncuya gösterilecek isim.
+    public string sceneToLoad; // Bu köye geçildiğinde yüklenecek sahnenin adı.
 
-    [Header("Sahne Bilgisi")]
-    [Tooltip("Bu köy için yüklenecek olan sahnenin tam adı.")]
-    public string sceneToLoad;
+    [Header("Köy İlerleme Hedefi")]
+    [Tooltip("Bu köyü tamamlamak ve bir sonrakine geçmek için ulaşılması gereken altın miktarı.")]
+    public int goldToCompleteVillage = 1000; // YENİ EKLENEN ALAN
 
-    [Header("Köy İçeriği")]
-    [Tooltip("Bu köydeki ejderhanın seviye ilerlemesini tanımlayan LevelData listesi.")]
+    [Header("Seviye İlerlemesi")]
+    [Tooltip("Bu köydeki ejderha seviyeleri ve seviye atlama koşulları.")]
     public List<LevelData> villageLevelProgression;
-    // TODO: Gelecekte bu köye özel binalar veya geliştirmeler buraya eklenebilir.
 }

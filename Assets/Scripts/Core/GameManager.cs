@@ -10,25 +10,30 @@ public class GameManager : Singleton<GameManager>
     public static event Action OnGameReady;
     public static event Action OnLevelUp;
     public static event Action OnStatsChanged;
-    public static event Action<bool> OnLevelUpReady;
+    public static event Action<bool> OnVillageCompletionReady;
 
-    [Header("Genel Oyun Verileri")]
+    [Header("Oyun Veri Listesi")]
     [SerializeField] private List<VillageData> allVillages;
 
-    public int TotalCoins { get; private set; }
+    // --- YENİ EKLENEN/GERİ GETİRİLEN DEĞİŞKEN ---
     public int TotalClicks { get; private set; }
 
-    private List<string> unlockedVillageIDs = new List<string>();
+    private Dictionary<string, int> villageCoins = new Dictionary<string, int>();
     private Dictionary<string, int> villageDragonLevels = new Dictionary<string, int>();
     public Dictionary<string, Dictionary<string, int>> BuildingLevels { get; private set; } = new Dictionary<string, Dictionary<string, int>>();
     private string currentVillageID;
-
-    private bool isReadyToLevelUp = false;
+    private bool isReadyForNextVillage = false;
 
     void Start()
     {
         LoadGame();
         OnGameReady?.Invoke();
+    }
+
+    public int GetCurrentVillageCoins()
+    {
+        villageCoins.TryGetValue(currentVillageID, out int coins);
+        return coins;
     }
 
     public VillageData GetCurrentVillageData()
@@ -54,125 +59,139 @@ public class GameManager : Singleton<GameManager>
         return level;
     }
 
-    // --- EKSİK OLAN VE GERİ EKLENEN METOT ---
-    /// <summary>
-    /// Bir binanın seviyesini genel kayıtlarda bir artırır.
-    /// </summary>
     public void IncrementBuildingLevel(string upgradeID)
     {
-        // O anki köy için bir kayıt yoksa, oluştur.
         if (!BuildingLevels.ContainsKey(currentVillageID))
         {
             BuildingLevels[currentVillageID] = new Dictionary<string, int>();
         }
-        // O bina için bir kayıt yoksa, seviyesini 1 yap.
         if (!BuildingLevels[currentVillageID].ContainsKey(upgradeID))
         {
             BuildingLevels[currentVillageID][upgradeID] = 1;
         }
         else
         {
-            // Eğer varsa, seviyesini bir artır.
             BuildingLevels[currentVillageID][upgradeID]++;
         }
 
-        // Pasif gelirin yeniden hesaplanması için sinyal gönder.
         if (PassiveIncomeManager.Instance != null)
         {
             PassiveIncomeManager.Instance.RecalculateTotalIncome();
         }
     }
 
-
-    public void AddCoins(int amount)
-    {
-        TotalCoins += amount;
-        OnStatsChanged?.Invoke();
-        CheckForLevelUpCondition();
-    }
-
+    // --- YENİ EKLENEN/GERİ GETİRİLEN METOT ---
     public void AddClicks(int amount)
     {
         TotalClicks += amount;
     }
 
+    public void AddCoins(int amount)
+    {
+        if (villageCoins.ContainsKey(currentVillageID))
+        {
+            villageCoins[currentVillageID] += amount;
+            OnStatsChanged?.Invoke();
+            CheckForVillageCompletion();
+        }
+    }
+
     public void SpendGold(int amount)
     {
-        if (TotalCoins >= amount) TotalCoins -= amount;
+        if (villageCoins.ContainsKey(currentVillageID) && villageCoins[currentVillageID] >= amount)
+        {
+            villageCoins[currentVillageID] -= amount;
+        }
         OnStatsChanged?.Invoke();
     }
 
-    private void CheckForLevelUpCondition()
+    private void CheckForVillageCompletion()
     {
-        if (isReadyToLevelUp) return;
+        if (isReadyForNextVillage) return;
 
         VillageData village = GetCurrentVillageData();
-        LevelData currentLevel = GetCurrentDragonLevelData();
-        if (village != null && currentLevel != null && GetCurrentDragonLevel() < village.villageLevelProgression.Count - 1)
+        if (village != null)
         {
-            if (TotalCoins >= currentLevel.goldToReachNextLevel)
+            if (GetCurrentVillageCoins() >= village.goldToCompleteVillage)
             {
-                isReadyToLevelUp = true;
-                OnLevelUpReady?.Invoke(true);
+                isReadyForNextVillage = true;
+                OnVillageCompletionReady?.Invoke(true);
             }
         }
     }
 
-    public void PerformLevelUp()
+    public void CompleteVillageAndAdvance()
     {
-        if (!isReadyToLevelUp) return;
-        LevelData currentLevel = GetCurrentDragonLevelData();
-        if (currentLevel == null) return;
+        if (!isReadyForNextVillage) return;
 
-        int costToLevelUp = currentLevel.goldToReachNextLevel;
-        if (TotalCoins >= costToLevelUp)
+        isReadyForNextVillage = false;
+        OnVillageCompletionReady?.Invoke(false);
+        AdvanceToNextVillage();
+    }
+
+    private void AdvanceToNextVillage()
+    {
+        int currentIndex = allVillages.FindIndex(v => v.villageID == currentVillageID);
+        int nextIndex = currentIndex + 1;
+
+        if (nextIndex < allVillages.Count)
         {
-            SpendGold(costToLevelUp);
+            VillageData nextVillage = allVillages[nextIndex];
+            currentVillageID = nextVillage.villageID;
+
+            if (!villageCoins.ContainsKey(currentVillageID))
+                villageCoins.Add(currentVillageID, 0);
+            else
+                villageCoins[currentVillageID] = 0;
+
+            if (!villageDragonLevels.ContainsKey(currentVillageID))
+                villageDragonLevels.Add(currentVillageID, 0);
+            else
+                villageDragonLevels[currentVillageID] = 0;
+
+            DOTween.KillAll();
+            SceneManager.LoadScene(nextVillage.sceneToLoad);
         }
-        isReadyToLevelUp = false;
-        LevelUp();
+        else
+        {
+            Debug.Log("Oyun Bitti! Tüm köyler tamamlandı.");
+        }
     }
 
     private void LevelUp()
     {
         villageDragonLevels[currentVillageID]++;
         OnLevelUp?.Invoke();
-        OnLevelUpReady?.Invoke(false);
         OnStatsChanged?.Invoke();
     }
 
-    public void UnlockAndSwitchToVillage(VillageData villageToUnlock)
+    public void PerformDragonLevelUp()
     {
-        if (villageToUnlock == null || unlockedVillageIDs.Contains(villageToUnlock.villageID)) return;
-        unlockedVillageIDs.Add(villageToUnlock.villageID);
-        villageDragonLevels.Add(villageToUnlock.villageID, 0);
-        SwitchToVillage(villageToUnlock.villageID);
-    }
+        LevelData currentLevelData = GetCurrentDragonLevelData();
+        if (currentLevelData == null) return;
 
-    public void SwitchToVillage(string villageID)
-    {
-        VillageData village = allVillages.FirstOrDefault(v => v.villageID == villageID);
-        if (village != null && !string.IsNullOrEmpty(village.sceneToLoad))
+        int costToLevelUp = currentLevelData.goldToReachNextLevel;
+        if (GetCurrentVillageCoins() >= costToLevelUp)
         {
-            currentVillageID = village.villageID;
-            DOTween.KillAll();
-            SceneManager.LoadScene(village.sceneToLoad);
+            SpendGold(costToLevelUp);
+            LevelUp();
         }
     }
 
     private void LoadGame()
     {
-        TotalCoins = 0;
+        // TotalClicks'i de sıfırla
         TotalClicks = 0;
-        unlockedVillageIDs.Clear();
+        villageCoins.Clear();
         villageDragonLevels.Clear();
         BuildingLevels.Clear();
+
         if (allVillages.Count > 0)
         {
             VillageData firstVillage = allVillages[0];
-            unlockedVillageIDs.Add(firstVillage.villageID);
-            villageDragonLevels.Add(firstVillage.villageID, 0);
             currentVillageID = firstVillage.villageID;
+            villageCoins.Add(currentVillageID, 0);
+            villageDragonLevels.Add(currentVillageID, 0);
         }
     }
 }

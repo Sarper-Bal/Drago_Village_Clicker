@@ -4,30 +4,21 @@ using TMPro;
 
 public class UpgradePopupManager : Singleton<UpgradePopupManager>
 {
-    [Header("Popup Arayüz Elemanları")]
-    [SerializeField] private GameObject popupPanel;
-    [SerializeField] private Image upgradeIcon;
-    [SerializeField] private TextMeshProUGUI upgradeNameText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private TextMeshProUGUI costText;
-    [SerializeField] private Button upgradeButton;
-    [SerializeField] private Button closeButton;
+    public GameObject popupPanel;
+    public TextMeshProUGUI upgradeNameText;
+    public TextMeshProUGUI descriptionText;
+    public TextMeshProUGUI costText;
+    public Image iconImage;
+    public Button upgradeButton;
+    public Button closeButton;
 
     private UpgradeableBuilding currentBuilding;
 
-    public override void Awake()
-    {
-        base.Awake();
-        if (popupPanel != null)
-        {
-            popupPanel.SetActive(false);
-        }
-    }
-
     private void Start()
     {
+        popupPanel.SetActive(false);
         upgradeButton.onClick.AddListener(OnUpgradeButtonClicked);
-        closeButton.onClick.AddListener(HideUpgradePopup);
+        closeButton.onClick.AddListener(ClosePopup);
     }
 
     public void ShowUpgradePopup(UpgradeableBuilding building)
@@ -35,39 +26,48 @@ public class UpgradePopupManager : Singleton<UpgradePopupManager>
         currentBuilding = building;
         UpgradeData data = building.CurrentUpgradeData;
 
-        upgradeIcon.sprite = data.icon;
+        if (data == null)
+        {
+            Debug.LogError("Geliştirme verisi bulunamadı!");
+            return;
+        }
+
         upgradeNameText.text = data.upgradeName;
         descriptionText.text = data.description;
         costText.text = data.cost.ToString("N0");
+        iconImage.sprite = data.icon;
 
-        upgradeButton.interactable = (GameManager.Instance.TotalCoins >= data.cost);
+        // HATA GİDERİLDİ: TotalCoins yerine GetCurrentVillageCoins kullanıldı.
+        upgradeButton.interactable = GameManager.Instance.GetCurrentVillageCoins() >= data.cost;
         popupPanel.SetActive(true);
-    }
-
-    private void HideUpgradePopup()
-    {
-        popupPanel.SetActive(false);
-        currentBuilding = null;
     }
 
     private void OnUpgradeButtonClicked()
     {
-        if (currentBuilding == null || currentBuilding.CurrentUpgradeData == null) return;
-
-        UpgradeData upgradeData = currentBuilding.CurrentUpgradeData;
-
-        if (GameManager.Instance.TotalCoins >= upgradeData.cost)
+        if (currentBuilding != null)
         {
-            GameManager.Instance.SpendGold(upgradeData.cost);
-            GameManager.Instance.IncrementBuildingLevel(upgradeData.upgradeID);
-
-            if (!string.IsNullOrEmpty(upgradeData.targetBuildingID))
+            UpgradeData data = currentBuilding.CurrentUpgradeData;
+            // HATA GİDERİLDİ: TotalCoins yerine GetCurrentVillageCoins kullanıldı.
+            if (GameManager.Instance.GetCurrentVillageCoins() >= data.cost)
             {
-                VillageManager.Instance.PlayAnimationOnBuilding(upgradeData.targetBuildingID);
-            }
+                GameManager.Instance.SpendGold(data.cost);
+                GameManager.Instance.IncrementBuildingLevel(data.upgradeID);
 
-            currentBuilding.AdvanceToNextUpgrade();
-            HideUpgradePopup();
+                // Bina animasyonunu tetikle
+                if (VillageManager.Instance != null && !string.IsNullOrEmpty(data.targetBuildingID))
+                {
+                    VillageManager.Instance.PlayAnimationOnBuilding(data.targetBuildingID);
+                }
+
+                currentBuilding.AdvanceToNextUpgrade();
+            }
         }
+        ClosePopup();
+    }
+
+    private void ClosePopup()
+    {
+        popupPanel.SetActive(false);
+        currentBuilding = null;
     }
 }

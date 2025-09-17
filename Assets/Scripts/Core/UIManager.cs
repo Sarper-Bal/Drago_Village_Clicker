@@ -18,7 +18,8 @@ public class UIManager : Singleton<UIManager>
     private void OnEnable()
     {
         GameManager.OnStatsChanged += UpdateGoldUI;
-        GameManager.OnLevelUpReady += SetLevelUpReadyState;
+        // Dinlenen event'i yeni sisteme uygun olanla değiştiriyoruz.
+        GameManager.OnVillageCompletionReady += SetLevelUpReadyState;
         DragonController.OnDragonClicked += PlayClickAnimation;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
@@ -26,7 +27,7 @@ public class UIManager : Singleton<UIManager>
     private void OnDisable()
     {
         GameManager.OnStatsChanged -= UpdateGoldUI;
-        GameManager.OnLevelUpReady -= SetLevelUpReadyState;
+        GameManager.OnVillageCompletionReady -= SetLevelUpReadyState;
         DragonController.OnDragonClicked -= PlayClickAnimation;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
@@ -40,8 +41,7 @@ public class UIManager : Singleton<UIManager>
     {
         yield return null;
 
-        // Sahnedeki Canvas'ı bulmak için yeni ve önerilen metodu kullan.
-        Canvas canvas = FindFirstObjectByType<Canvas>(); // <-- DEĞİŞİKLİK BURADA
+        Canvas canvas = FindFirstObjectByType<Canvas>();
         if (canvas != null)
         {
             levelUpPanel = canvas.transform.Find("LevelUp_Panel")?.GetComponent<RectTransform>();
@@ -53,6 +53,7 @@ public class UIManager : Singleton<UIManager>
                 if (levelUpButton != null)
                 {
                     levelUpButton.onClick.RemoveAllListeners();
+                    // Buton tıklandığında artık köyü tamamlayıp ilerleme fonksiyonunu çağıracak.
                     levelUpButton.onClick.AddListener(OnLevelUpButtonClicked);
                 }
 
@@ -66,12 +67,25 @@ public class UIManager : Singleton<UIManager>
     private void UpdateGoldUI()
     {
         if (goldText == null) return;
-        goldText.text = GameManager.Instance.TotalCoins.ToString("N0");
+
+        // Artık sadece mevcut altını değil, köy tamamlama hedefini de gösteriyoruz.
+        int currentGold = GameManager.Instance.GetCurrentVillageCoins();
+        VillageData villageData = GameManager.Instance.GetCurrentVillageData();
+        if (villageData != null)
+        {
+            int targetGold = villageData.goldToCompleteVillage;
+            goldText.text = $"{currentGold.ToString("N0")} / {targetGold.ToString("N0")}";
+        }
+        else
+        {
+            goldText.text = currentGold.ToString("N0");
+        }
     }
 
     private void OnLevelUpButtonClicked()
     {
-        GameManager.Instance.PerformLevelUp();
+        // Butonun görevi artık köyü tamamlamak ve ilerlemek.
+        GameManager.Instance.CompleteVillageAndAdvance();
     }
 
     private void SetLevelUpReadyState(bool isReady)
@@ -82,13 +96,14 @@ public class UIManager : Singleton<UIManager>
         if (isReady)
         {
             levelUpButton.interactable = true;
+            if (goldText != null) goldText.text = "İlerle!"; // Oyuncuya geri bildirim ver.
             StartReadyPulseAnimation();
         }
         else
         {
             levelUpButton.interactable = false;
             StopReadyPulseAnimation();
-            UpdateGoldUI();
+            UpdateGoldUI(); // Panelin metnini normale döndür.
         }
     }
 
